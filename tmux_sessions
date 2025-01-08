@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+tmux new-window -n "src" -c "./src"
+tmux new-window -n "components" -c "./src/components"
+tmux new-window -n "etc" -c "./"
