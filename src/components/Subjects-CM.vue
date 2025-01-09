@@ -85,7 +85,7 @@ const data = ref(null)
 const loading = ref(true);
 onMounted(async () => {
   try {
-    const response = await fetch('http://collegecm.work.gd/v1/subjects')
+    const response = await fetch('https://collegecm.work.gd/v1/subjects')
     if (!response.ok) throw new Error('Network response was not ok')
     data.value = await response.json()
     loading.value = false;
@@ -116,7 +116,7 @@ const saveSubject = async () => {
     subject.value.active = subject.value.active.value;
     subject.value.ministerial = subject.value.ministerial.value;
     try {
-      const response = await fetch('http://collegecm.work.gd/v1/subjects', {
+      const response = await fetch('https://collegecm.work.gd/v1/subjects', {
         method: 'POST',
         body: JSON.stringify(subject.value),
         headers: {
@@ -147,7 +147,7 @@ const confirmDeleteSubject = (subj) => {
 const deleteSubject = async () => {
   if (subject?.value.subject_id) {
     try {
-      const response = await fetch(`http://collegecm.work.gd/v1/subjects/${subject.value.subject_id}`, {
+      const response = await fetch(`https://collegecm.work.gd/v1/subjects/${subject.value.subject_id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
