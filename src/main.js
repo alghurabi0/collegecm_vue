@@ -1,6 +1,7 @@
 //import './assets/main.css'
 import './index.css'
 import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
 import Aura from '@primevue/themes/aura'
 
 import { createApp } from 'vue'
@@ -18,5 +19,6 @@ app.use(PrimeVue, {
     }
   }
 })
+app.use(ToastService);
 
 app.mount('#app')
