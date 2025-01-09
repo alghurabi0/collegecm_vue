@@ -4,14 +4,16 @@ import Button from 'primevue/button';
 function toggleDarkMode() {
   document.documentElement.classList.toggle('my-app-dark');
 }
+
 </script>
 
 <template>
   <header>
     <div>
-      <nav>
-        <Button label="Toggle Dark Mode" @click="toggleDarkMode()" />
-        <RouterLink to="/subjects">Subjects</RouterLink>
+      <nav class="flex flex-row-reverse mt-5">
+        <Button label="Mode" @click="toggleDarkMode()" />
+        <RouterLink class="mr-5 hover:text-green-500" to="/">Home</RouterLink>
+        <RouterLink class="mr-5 hover:text-green-500" to="/subjects">Subjects</RouterLink>
       </nav>
     </div>
   </header>

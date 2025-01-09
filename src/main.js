@@ -1,4 +1,5 @@
-import './assets/main.css'
+//import './assets/main.css'
+import './index.css'
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura'
 
