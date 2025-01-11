@@ -46,8 +46,44 @@ const stages = ref([
 const semesters = ref([
   { label: 'الاول', value: 'الاول' },
   { label: 'الثاني', value: 'الثاني' },
-])
+]);
+// file upload
+const fileInput = ref(null);
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
 
+  if (!file.type.match('text/csv')) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please upload a CSV file.', life: 3000 });
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await fetch('https://collegecm.work.gd/v1/subjects/import', { // Adjust the endpoint URL
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      toast.add({ severity: 'danger', summary: 'Error', detail: errorData.error || 'Import failed.', life: 5000 });
+    } else {
+      // Update the data table after successful import
+      const newData = await response.json();
+      data.value.subjects = newData.subjects; // Assuming the response contains the updated subjects array
+      toast.add({ severity: 'success', summary: 'Success', detail: 'Subjects imported successfully.', life: 3000 });
+    }
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Import failed.', life: 5000 });
+    console.error('Error importing subjects:', error);
+  } finally {
+    fileInput.value.value = null; // Clear the file input
+  }
+};
+// editing rows
 const editingRows = ref([]);
 const onRowEditSave = async (event) => {
   let { newData, data: rowData } = event;
@@ -186,6 +222,9 @@ const exportCSV = () => {
       <Button label="اضافة" icon="pi pi-plus" class="mr-2" @click="openNew" />
     </template>
     <template #end>
+      <input type="file" ref="fileInput" hidden @change="handleFileUpload" accept=".csv" />
+      <Button label="استيراد" icon="pi pi-download" severity="secondary" @click="fileInput.value.click()"
+        class="mr-2" />
       <Button label="تصدير" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
     </template>
   </Toolbar>
@@ -304,8 +343,9 @@ const exportCSV = () => {
       <div>
         <label for="subject_id" class="block font-bold mb-3">رقم المادة</label>
         <InputNumber id="subject_name" v-model.trim.number="subject.subject_id" required="true" autofocus
-          :invalid="submitted && !subject.subject_id" fluid />
-        <small v-if="submitted && !subject.subject_id" class="text-red-500">يجب ادخال رقم المادة</small>
+          :invalid="submitted && (!subject.subject_id || subject.subject.id < 0)" fluid />
+        <small v-if="submitted && (!subject.subject_id || subject.subject.id < 0)" class="text-red-500">يجب ادخال رقم
+          المادة</small>
       </div>
       <div>
         <label for="subject_name" class="block font-bold mb-3">اسم المادة</label>
@@ -338,32 +378,40 @@ const exportCSV = () => {
       <div>
         <label for="max_theory_mark" class="block font-bold mb-3">درجة النظري</label>
         <InputNumber id="max_theory_mark" v-model.trim.number="subject.max_theory_mark" required="true" autofocus
-          :invalid="submitted && !subject.max_theory_mark" fluid />
-        <small v-if="submitted && !subject.max_theory_mark" class="text-red-500">يجب ادخال درجة النظري</small>
+          :invalid="submitted && (!subject.max_theory_mark || subject.max_theory_mark < 0)" fluid />
+        <small v-if="submitted && (!subject.max_theory_mark || subject.max_theory_mark < 0)" class="text-red-500">يجب
+          ادخال درجة النظري</small>
       </div>
       <div>
         <label for="max_lab_mark" class="block font-bold mb-3">درجة العملي</label>
         <InputNumber id="max_lab_mark" v-model.trim.number="subject.max_lab_mark" required="true" autofocus
-          :invalid="submitted && !subject.max_lab_mark" fluid />
-        <small v-if="submitted && !subject.max_lab_mark" class="text-red-500">يجب ادخال درجة العملي</small>
+          :invalid="submitted && (!subject.max_lab_mark || subject.max_lab_mark < 0)" fluid />
+        <small v-if="submitted && (!subject.max_lab_mark || subject.max_lab_mark < 0)" class="text-red-500">يجب ادخال
+          درجة
+          العملي</small>
       </div>
       <div>
         <label for="max_semester_mark" class="block font-bold mb-3">درجة السعي</label>
         <InputNumber id="max_semester_mark" v-model.trim.number="subject.max_semester_mark" required="true" autofocus
-          :invalid="submitted && !subject.max_semester_mark" fluid />
-        <small v-if="submitted && !subject.max_semester_mark" class="text-red-500">يجب ادخال درجة السعي</small>
+          :invalid="submitted && (!subject.max_semester_mark || subject.max_semester_mark < 0)" fluid />
+        <small v-if="submitted && (!subject.max_semester_mark || subject.max_semester_mark < 0)"
+          class="text-red-500">يجب
+          ادخال درجة السعي</small>
       </div>
       <div>
         <label for="max_final_exam" class="block font-bold mb-3">درجة الامتحان</label>
         <InputNumber id="max_final_exam" v-model.trim.number="subject.max_final_exam" required="true" autofocus
-          :invalid="submitted && !subject.max_final_exam" fluid />
-        <small v-if="submitted && !subject.max_final_exam" class="text-red-500">يجب ادخال درجة الامتحان</small>
+          :invalid="submitted && (!subject.max_final_exam || subject.max_final_exam < 0)" fluid />
+        <small v-if="submitted && (!subject.max_final_exam || subject.max_final_exam < 0)" class="text-red-500">يجب
+          ادخال
+          درجة الامتحان</small>
       </div>
       <div>
         <label for="credits" class="block font-bold mb-3">الةحدات</label>
         <InputNumber id="credits" v-model.trim.number="subject.credits" required="true" autofocus
-          :invalid="submitted && !subject.credits" fluid />
-        <small v-if="submitted && !subject.credits" class="text-red-500">يجب ادخال الوحدات</small>
+          :invalid="submitted && (!subject.credits || subject.credits < 0)" fluid />
+        <small v-if="submitted && (!subject.credits || subject.credits < 0)" class="text-red-500">يجب ادخال
+          الوحدات</small>
       </div>
       <div>
         <label for="active" class="block font-bold mb-3">مفعل</label>
