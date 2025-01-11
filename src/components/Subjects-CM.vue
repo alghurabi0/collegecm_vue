@@ -189,10 +189,11 @@ const exportCSV = () => {
       <Button label="تصدير" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
     </template>
   </Toolbar>
-  <DataTable dir="rtl" ref="dt" sortField="subject_id" :sortOrder="1" removableSort :value="data?.subjects" size="small"
-    showGridlines tableStyle="min-width: 50rem" paginator :rows="10" :rowsPerPageOptions="rowsPerPageOptions"
-    :loading="loading" v-model:filters="filters" dataKey="subject_id" v-model:editingRows="editingRows" editMode="row"
-    @row-edit-save="onRowEditSave" resizableColumns>
+  <DataTable dir="rtl" ref="dt" stateStorage="session" stateKey="dt-state-demo-session" sortField="subject_id"
+    :sortOrder="1" removableSort :value="data?.subjects" size="small" showGridlines tableStyle="min-width: 50rem"
+    paginator :rows="10" :rowsPerPageOptions="rowsPerPageOptions" :loading="loading" v-model:filters="filters"
+    dataKey="subject_id" v-model:editingRows="editingRows" editMode="row" @row-edit-save="onRowEditSave"
+    resizableColumns>
     <template #footer>Hello world</template>
 
     <template #header>
