@@ -13,7 +13,7 @@ function toggleDarkMode() {
       <nav class="flex flex-row-reverse mt-5">
         <Button label="Mode" @click="toggleDarkMode()" />
         <RouterLink class="mr-5 hover:text-green-500" to="/">Home</RouterLink>
-        <RouterLink class="mr-5 hover:text-green-500" to="/subjects">Subjects</RouterLink>
+        <RouterLink class="mr-5 hover:text-green-500" to="/subjects">المواد</RouterLink>
       </nav>
     </div>
   </header>

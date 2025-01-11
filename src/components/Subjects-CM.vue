@@ -93,6 +93,7 @@ onMounted(async () => {
     console.error('Error fetching data:', error)
   }
 })
+const count = ref(data.value.subjects.length);
 // adding a subject
 const subject = ref({});
 const subjectDialog = ref(false);
@@ -176,14 +177,14 @@ const exportCSV = () => {
 <template>
   <Toolbar class="mb-6">
     <template #start>
-      <Button label="New" icon="pi pi-plus" class="mr-2" @click="openNew" />
+      <Button label="اضافة" icon="pi pi-plus" class="mr-2" @click="openNew" />
     </template>
     <template #end>
-      <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
+      <Button label="تصدير" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
     </template>
   </Toolbar>
   <DataTable dir="rtl" ref="dt" sortField="subject_id" :sortOrder="1" removableSort :value="data?.subjects" size="small"
-    showGridlines tableStyle="min-width: 50rem" paginator :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]"
+    showGridlines tableStyle="min-width: 50rem" paginator :rows="10" :rowsPerPageOptions="[5, 10, 20, 50, count]"
     :loading="loading" v-model:filters="filters" dataKey="subject_id" v-model:editingRows="editingRows" editMode="row"
     @row-edit-save="onRowEditSave" resizableColumns>
     <template #footer>Hello world</template>
@@ -194,12 +195,12 @@ const exportCSV = () => {
           <InputIcon>
             <i class="pi pi-search" />
           </InputIcon>
-          <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
+          <InputText v-model="filters['global'].value" placeholder="بحث" />
         </IconField>
       </div>
     </template>
-    <template #empty> No subjects found. </template>
-    <template #loading> Loading subjects data. Please wait. </template>
+    <template #empty> لا يوجد مواد </template>
+    <template #loading> يتم تحميل المواد, يرجى الانتظار </template>
     <Column field="subject_id" header="رقم المادة" sortable>
       <template #editor="{ data, field }">
         <InputNumber v-model="data[field]" fluid />
@@ -263,7 +264,7 @@ const exportCSV = () => {
       </template>
       <template #editor="{ data, field }">
         <Select v-model="data[field]" :options="statuses" optionLabel="label" optionValue="value"
-          placeholder="Select a Status" fluid>
+          placeholder="اختر الحالة" fluid>
           <template #option="slotProps">
             <Tag :value="slotProps.option.value" :severity="getStatusLabel(slotProps.option.value)" />
           </template>
@@ -276,7 +277,7 @@ const exportCSV = () => {
       </template>
       <template #editor="{ data, field }">
         <Select v-model="data[field]" :options="statuses" optionLabel="label" optionValue="value"
-          placeholder="Select a Status" fluid>
+          placeholder="اختر الحالة" fluid>
           <template #option="slotProps">
             <Tag :value="slotProps.option.value" :severity="getStatusLabel(slotProps.option.value)" />
           </template>
@@ -291,7 +292,7 @@ const exportCSV = () => {
       </template>
     </Column>
   </DataTable>
-  <Dialog dir="rtl" v-model:visible="subjectDialog" class="w-2/5" header="Subject Details" :modal="true">
+  <Dialog dir="rtl" v-model:visible="subjectDialog" class="w-2/5" header="تفاصيل المادة" :modal="true">
     <div class="flex flex-col gap-6">
       <div>
         <label for="subject_id" class="block font-bold mb-3">رقم المادة</label>
