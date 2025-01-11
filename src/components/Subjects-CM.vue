@@ -93,7 +93,13 @@ onMounted(async () => {
     console.error('Error fetching data:', error)
   }
 })
-const count = ref(data.value.subjects.length);
+const rowsPerPageOptions = computed(() => {
+  const options = [5, 10, 20, 50];
+  if (data.value && data.value.subjects) {
+    options.push(data.value.subjects.length); // Add "Show All" option
+  }
+  return options;
+});
 // adding a subject
 const subject = ref({});
 const subjectDialog = ref(false);
@@ -184,7 +190,7 @@ const exportCSV = () => {
     </template>
   </Toolbar>
   <DataTable dir="rtl" ref="dt" sortField="subject_id" :sortOrder="1" removableSort :value="data?.subjects" size="small"
-    showGridlines tableStyle="min-width: 50rem" paginator :rows="10" :rowsPerPageOptions="[5, 10, 20, 50, count]"
+    showGridlines tableStyle="min-width: 50rem" paginator :rows="10" :rowsPerPageOptions="rowsPerPageOptions"
     :loading="loading" v-model:filters="filters" dataKey="subject_id" v-model:editingRows="editingRows" editMode="row"
     @row-edit-save="onRowEditSave" resizableColumns>
     <template #footer>Hello world</template>
