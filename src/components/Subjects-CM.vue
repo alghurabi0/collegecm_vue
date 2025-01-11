@@ -169,7 +169,7 @@ const deleteSubject = async () => {
 // export
 const dt = ref();
 const exportCSV = () => {
-    dt.value.exportCSV();
+  dt.value.exportCSV();
 };
 </script>
 
@@ -291,7 +291,7 @@ const exportCSV = () => {
       </template>
     </Column>
   </DataTable>
-  <Dialog v-model:visible="subjectDialog" class="w-2/5" header="Subject Details" :modal="true">
+  <Dialog dir="rtl" v-model:visible="subjectDialog" class="w-2/5" header="Subject Details" :modal="true">
     <div class="flex flex-col gap-6">
       <div>
         <label for="subject_id" class="block font-bold mb-3">رقم المادة</label>
