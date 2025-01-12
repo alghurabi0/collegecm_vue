@@ -74,7 +74,12 @@ const handleFileUpload = async (event) => {
       // Update the data table after successful import
       const newData = await response.json();
       data.value.subjects = newData.subjects; // Assuming the response contains the updated subjects array
-      toast.add({ severity: 'success', summary: 'Success', detail: 'Subjects imported successfully.', life: 3000 });
+      toast.add({ severity: 'success', summary: 'Success', detail: 'Subjects imported successfully.', life: 2000 });
+      if (newData.errors) {
+        Object.keys(newData.errors).forEach(key => {
+          toast.add({ severity: 'warn', summary: 'لم يتم ادخال المواد التالية', detail: `${key}: ${newData.errors[key]}` })
+        })
+      }
     }
   } catch (error) {
     toast.add({ severity: 'error', summary: 'Error', detail: 'Import failed.', life: 5000 });
