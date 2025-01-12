@@ -47,6 +47,7 @@ const semesters = ref([
   { label: 'الاول', value: 'الاول' },
   { label: 'الثاني', value: 'الثاني' },
 ]);
+const toast = useToast();
 // file upload
 const fileInput = ref(null);
 const handleFileUpload = async (event) => {
@@ -145,7 +146,6 @@ const rowsPerPageOptions = computed(() => {
 const subject = ref({});
 const subjectDialog = ref(false);
 const submitted = ref(false);
-const toast = useToast();
 const openNew = () => {
   subject.value = {};
   submitted.value = false;
@@ -245,7 +245,7 @@ const exportCSV = () => {
           <InputIcon>
             <i class="pi pi-search" />
           </InputIcon>
-          <InputText v-model="filters['global'].value" placeholder="بحث" />
+          <InputText id="search" v-model="filters['global'].value" placeholder="بحث" />
         </IconField>
       </div>
     </template>
