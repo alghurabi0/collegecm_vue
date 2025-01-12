@@ -223,8 +223,7 @@ const exportCSV = () => {
     </template>
     <template #end>
       <input type="file" ref="fileInput" hidden @change="handleFileUpload" accept=".csv" />
-      <Button label="استيراد" icon="pi pi-download" severity="secondary" @click="fileInput.value.click()"
-        class="mr-2" />
+      <Button label="استيراد" icon="pi pi-download" severity="secondary" @click="fileInput.click()" class="mr-2" />
       <Button label="تصدير" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
     </template>
   </Toolbar>
