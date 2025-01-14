@@ -86,7 +86,7 @@ const saveStudent = async () => {
         if (!Array.isArray(data.value.students)) {
           data.value.students = [];
         }
-        const newStudent = response.json()
+        const newStudent = await response.json();
         data.value.students.push(newStudent.student);
         toast.add({ severity: 'success', summary: 'Successful', detail: 'تم انشاء المادة', life: 4000 });
         studentDialog.value = false;
