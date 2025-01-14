@@ -232,7 +232,7 @@ const exportCSV = () => {
       <Button label="تصدير" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
     </template>
   </Toolbar>
-  <DataTable dir="rtl" ref="dt" stateStorage="session" stateKey="dt-state-demo-session" sortField="subject_id"
+  <DataTable dir="rtl" ref="dt" stateStorage="session" stateKey="dt-state-subjects-session" sortField="subject_id"
     :sortOrder="1" removableSort :value="data?.subjects" size="small" showGridlines tableStyle="min-width: 50rem"
     paginator :rows="10" :rowsPerPageOptions="rowsPerPageOptions" :loading="loading" v-model:filters="filters"
     dataKey="subject_id" v-model:editingRows="editingRows" editMode="row" @row-edit-save="onRowEditSave"
@@ -347,8 +347,11 @@ const exportCSV = () => {
       <div>
         <label for="subject_id" class="block font-bold mb-3">رقم المادة</label>
         <InputNumber id="subject_name" v-model.trim.number="subject.subject_id" required="true" autofocus
-          :invalid="submitted && (!subject.subject_id || subject.subject.id < 0)" fluid />
-        <small v-if="submitted && (!subject.subject_id || subject.subject.id < 0)" class="text-red-500">يجب ادخال رقم
+          :invalid="submitted && (subject.subject_id === null || subject.subject_id === undefined || subject.subject.id < 0)"
+          fluid />
+        <small
+          v-if="submitted && (subject.subject_id === null || subject.subject_id === undefined || subject.subject.id < 0)"
+          class="text-red-500">يجب ادخال رقم
           المادة</small>
       </div>
       <div>
@@ -382,39 +385,52 @@ const exportCSV = () => {
       <div>
         <label for="max_theory_mark" class="block font-bold mb-3">درجة النظري</label>
         <InputNumber id="max_theory_mark" v-model.trim.number="subject.max_theory_mark" required="true" autofocus
-          :invalid="submitted && (!subject.max_theory_mark || subject.max_theory_mark < 0)" fluid />
-        <small v-if="submitted && (!subject.max_theory_mark || subject.max_theory_mark < 0)" class="text-red-500">يجب
+          :invalid="submitted && (subject.max_theory_mark === null || subject.max_theory_mark === undefined || subject.max_theory_mark < 0)"
+          fluid />
+        <small
+          v-if="submitted && (subject.max_theory_mark === null || subject.max_theory_mark === undefined || subject.max_theory_mark < 0)"
+          class="text-red-500">يجب
           ادخال درجة النظري</small>
       </div>
       <div>
         <label for="max_lab_mark" class="block font-bold mb-3">درجة العملي</label>
         <InputNumber id="max_lab_mark" v-model.trim.number="subject.max_lab_mark" required="true" autofocus
-          :invalid="submitted && (!subject.max_lab_mark || subject.max_lab_mark < 0)" fluid />
-        <small v-if="submitted && (!subject.max_lab_mark || subject.max_lab_mark < 0)" class="text-red-500">يجب ادخال
+          :invalid="submitted && (subject.max_lab_mark === null || subject.max_lab_mark === undefined || subject.max_lab_mark < 0)"
+          fluid />
+        <small
+          v-if="submitted && (subject.max_lab_mark === null || subject.max_lab_mark === undefined || subject.max_lab_mark < 0)"
+          class="text-red-500">يجب ادخال
           درجة
           العملي</small>
       </div>
       <div>
         <label for="max_semester_mark" class="block font-bold mb-3">درجة السعي</label>
         <InputNumber id="max_semester_mark" v-model.trim.number="subject.max_semester_mark" required="true" autofocus
-          :invalid="submitted && (!subject.max_semester_mark || subject.max_semester_mark < 0)" fluid />
-        <small v-if="submitted && (!subject.max_semester_mark || subject.max_semester_mark < 0)"
+          :invalid="submitted && (subject.max_semester_mark === null || subject.max_semester_mark === undefined || subject.max_semester_mark < 0)"
+          fluid />
+        <small
+          v-if="submitted && (subject.max_semester_mark === null || subject.max_semester_mark === undefined || subject.max_semester_mark < 0)"
           class="text-red-500">يجب
           ادخال درجة السعي</small>
       </div>
       <div>
         <label for="max_final_exam" class="block font-bold mb-3">درجة الامتحان</label>
         <InputNumber id="max_final_exam" v-model.trim.number="subject.max_final_exam" required="true" autofocus
-          :invalid="submitted && (!subject.max_final_exam || subject.max_final_exam < 0)" fluid />
-        <small v-if="submitted && (!subject.max_final_exam || subject.max_final_exam < 0)" class="text-red-500">يجب
+          :invalid="submitted && (subject.max_final_exam === null || subject.max_final_exam === undefined || subject.max_final_exam < 0)"
+          fluid />
+        <small
+          v-if="submitted && (subject.max_final_exam === null || subject.max_final_exam === undefined || subject.max_final_exam < 0)"
+          class="text-red-500">يجب
           ادخال
           درجة الامتحان</small>
       </div>
       <div>
         <label for="credits" class="block font-bold mb-3">الةحدات</label>
         <InputNumber id="credits" v-model.trim.number="subject.credits" required="true" autofocus
-          :invalid="submitted && (!subject.credits || subject.credits < 0)" fluid />
-        <small v-if="submitted && (!subject.credits || subject.credits < 0)" class="text-red-500">يجب ادخال
+          :invalid="submitted && (subject.credits === null || subject.credits === undefined || subject.credits < 0)"
+          fluid />
+        <small v-if="submitted && (subject.credits === null || subject.credits === undefined || subject.credits < 0)"
+          class="text-red-500">يجب ادخال
           الوحدات</small>
       </div>
       <div>
