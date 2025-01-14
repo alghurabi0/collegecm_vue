@@ -69,9 +69,7 @@ const saveStudent = async () => {
   submitted.value = true;
 
   if (student?.value.student_name && student?.value.stage && student?.value.student_id && student?.value.state) {
-    student.value.student_name = student.value.student_name.value;
     student.value.stage = student.value.stage.value;
-    student.value.student_id = student.value.student_id.value;
     student.value.state = student.value.state.value;
     try {
       const response = await fetch('https://collegecm.work.gd/v1/students', {
