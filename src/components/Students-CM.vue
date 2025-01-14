@@ -83,6 +83,9 @@ const saveStudent = async () => {
         const errorData = await response.json();
         toast.add({ severity: 'danger', summary: 'Fail', details: errorData.error || 'حدث خطأ', life: 10000 });
       } else {
+        if (!Array.isArray(data.value.students)) {
+          data.value.students = [];
+        }
         data.value.students.push(student.value);
         toast.add({ severity: 'success', summary: 'Successful', detail: 'تم انشاء المادة', life: 4000 });
         studentDialog.value = false;
@@ -98,6 +101,8 @@ const saveStudent = async () => {
 const editingRows = ref([]);
 const onRowEditSave = async (event) => {
   let { newData, data: rowData } = event;
+  const { seq_in_college, ...dataToSend } = newData;
+  console.log(seq_in_college);
   const index = data.value.students.findIndex(student => student.student_id === rowData.student_id);
   if (index === -1) {
     toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 10000 });
@@ -107,7 +112,7 @@ const onRowEditSave = async (event) => {
   try {
     const response = await fetch(`https://collegecm.work.gd/v1/students/${rowData.student_id}`, {
       method: 'PATCH',
-      body: JSON.stringify(newData),
+      body: JSON.stringify(dataToSend),
       headers: {
         'Content-Type': 'application/json'
       }
