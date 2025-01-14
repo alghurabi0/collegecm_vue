@@ -103,6 +103,7 @@ const editingRows = ref([]);
 const onRowEditSave = async (event) => {
   let { newData, data: rowData } = event;
   const { seq_in_college, ...dataToSend } = newData;
+  dataToSend.old_id = rowData.student_id;
   console.log(seq_in_college);
   const index = data.value.students.findIndex(student => student.student_id === rowData.student_id);
   if (index === -1) {
