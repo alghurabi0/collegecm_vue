@@ -54,7 +54,7 @@ const options = {
   autoWidth: true,
   //stateSave: true,
   layout: {
-    topStart: 'buttons'
+    top2End: 'buttons'
   },
 }
 let dt;
