@@ -15,6 +15,7 @@ function toggleDarkMode() {
         <RouterLink class="mr-5 hover:text-green-500" to="/">Home</RouterLink>
         <RouterLink class="mr-5 hover:text-green-500" to="/subjects">المواد</RouterLink>
         <RouterLink class="mr-5 hover:text-green-500" to="/students">الطلاب</RouterLink>
+        <RouterLink class="mr-5 hover:text-green-500" to="/students-ag">الطلاب2</RouterLink>
       </nav>
     </div>
   </header>

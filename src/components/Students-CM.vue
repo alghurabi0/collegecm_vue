@@ -30,7 +30,7 @@ const states = ref([
 // table config
 const dt = ref();
 const rowsPerPageOptions = computed(() => {
-  const options = [5, 10, 20, 50];
+  const options = [5, 10, 20, 50, 200];
   if (data.value && data.value.students) {
     options.push(data.value.students.length); // Add "Show All" option
   }
@@ -218,9 +218,7 @@ const exportCSV = () => {
     :sortOrder="1" removableSort :value="data?.students" size="small" showGridlines tableStyle="min-width: 50rem"
     paginator :rows="10" :rowsPerPageOptions="rowsPerPageOptions" :loading="loading" v-model:filters="filters"
     dataKey="student_id" v-model:editingRows="editingRows" editMode="row" @row-edit-save="onRowEditSave"
-    resizableColumns>
-    <template #footer>Hello world</template>
-
+    resizableColumns :virtualScrollerOptions="{ itemSize: 46 }">
     <template #header>
       <div class="flex justify-end mr-5 justify-self-start">
         <IconField>

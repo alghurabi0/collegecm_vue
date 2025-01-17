@@ -136,7 +136,7 @@ onMounted(async () => {
   }
 })
 const rowsPerPageOptions = computed(() => {
-  const options = [5, 10, 20, 50];
+  const options = [5, 10, 20, 50, 200];
   if (data.value && data.value.subjects) {
     options.push(data.value.subjects.length); // Add "Show All" option
   }
