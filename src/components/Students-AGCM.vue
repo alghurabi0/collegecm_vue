@@ -11,7 +11,7 @@ import 'datatables.net-buttons/js/buttons.html5';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import { useToast } from 'primevue';
-import Toolbar from 'primevue/toolbar';
+//import Toolbar from 'primevue/toolbar';
 import InputNumber from 'primevue/inputnumber';
 import Select from 'primevue/select';
 import Dialog from 'primevue/dialog';
@@ -54,8 +54,29 @@ const options = {
   autoWidth: true,
   //stateSave: true,
   layout: {
-    top2End: 'buttons'
+    top2End: {
+      buttons: ['csv', { extend: 'excel', text: 'Excel تصدير', className: 'excel_button' }, {
+        text: "CSV استيراد", name: "import_csv",
+        action: function () {
+          fileInput.value.click();
+        }
+      }]
+    },
+    top2Start: {
+      buttons: [
+        {
+          text: "اضافة", name: "add", className: "add_student", action: function () {
+            student.value = {};
+            submitted.value = false;
+            studentDialog.value = true;
+          }
+        }
+      ],
+    },
   },
+  language: {
+    url: "https://cdn.datatables.net/plug-ins/2.2.1/i18n/ar.json"
+  }
 }
 let dt;
 const table = ref();
@@ -179,15 +200,49 @@ const deleteStudent = async () => {
     }
   }
 };
+// import
+const fileInput = ref(null);
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (!file.type.match('text/csv')) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'يرجى اختيار ملف بصيغة csv', life: 3000 });
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await fetch('https://collegecm.work.gd/v1/students/import', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      toast.add({ severity: 'danger', summary: 'Error', detail: errorData.error || 'فشل الاستيراد', life: 5000 });
+    } else {
+      const newData = await response.json();
+      data.value.students = newData.students;
+      toast.add({ severity: 'success', summary: 'Success', detail: 'تم اسيراد المواد بنجاح', life: 3000 });
+      if (newData.errors) {
+        Object.keys(newData.errors).forEach(key => {
+          toast.add({ severity: 'warn', summary: 'لم يتم ادخال المواد التالية', detail: `${key}: ${newData.errors[key]}` })
+        })
+      }
+    }
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Error', detail: 'فشل الاستيراد', life: 5000 });
+    console.error('Error importing students:', error);
+  } finally {
+    fileInput.value.value = null;
+  }
+}
 </script>
 <template>
-  <Toolbar class="mb-6">
-    <template #start>
-      <Button label="اضافة" icon="pi pi-plus" class="mr-2" @click="openStudentDialog" />
-    </template>
-    <template #end>
-    </template>
-  </Toolbar>
+  <input type="file" ref="fileInput" hidden @change="handleFileUpload" accept=".csv" />
   <DataTable dir="rtl" :columns="cols" :data="data?.students" ref="table" :options="options" class="cell-border">
     <template #action="props">
       <Button icon="pi pi-pencil" outlined rounded class=""
@@ -251,5 +306,31 @@ const deleteStudent = async () => {
 
 table.dataTable thead th {
   text-align: right;
+}
+
+div.dt-buttons>.dt-button.excel_button,
+div.dt-buttons>.dt-button.add_student {
+  display: inline-flex;
+  cursor: pointer;
+  user-select: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  color: var(--p-button-primary-color);
+  background: var(--p-button-primary-background);
+  border: 1px solid var(--p-button-primary-border-color);
+  padding: var(--p-button-padding-y) var(--p-button-padding-x);
+  font-size: 1rem;
+  font-family: inherit;
+  font-feature-settings: inherit;
+  transition: background var(--p-button-transition-duration), color var(--p-button-transition-duration), border-color var(--p-button-transition-duration), outline-color var(--p-button-transition-duration), box-shadow var(--p-button-transition-duration);
+  border-radius: var(--p-button-border-radius);
+  outline-color: transparent;
+  gap: var(--p-button-gap);
+}
+
+div.dt-buttons>.dt-button.add_student {
+  margin-left: 12px;
 }
 </style>
