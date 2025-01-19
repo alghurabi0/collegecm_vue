@@ -16,6 +16,10 @@ function toggleDarkMode() {
         <RouterLink class="mr-5 hover:text-green-500" to="/subjects">المواد</RouterLink>
         <RouterLink class="mr-5 hover:text-green-500" to="/students">الطلاب</RouterLink>
         <RouterLink class="mr-5 hover:text-green-500" to="/students-ag">الطلاب2</RouterLink>
+        <RouterLink class="mr-5 hover:text-green-500" to="/carryovers">التحميل</RouterLink>
+        <RouterLink class="mr-5 hover:text-green-500" to="/exempted">الاعفاء</RouterLink>
+        <RouterLink class="mr-5 hover:text-green-500" to="/marks">الدرجات</RouterLink>
+
       </nav>
     </div>
   </header>

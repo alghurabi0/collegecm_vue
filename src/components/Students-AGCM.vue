@@ -43,7 +43,7 @@ const cols = [
   {
     data: null,
     render: '#action',
-    title: 'Action',
+    title: '',
     orderable: false,
   },
 ]
@@ -65,7 +65,7 @@ const options = {
     top2Start: {
       buttons: [
         {
-          text: "اضافة", name: "add", className: "add_student", action: function () {
+          text: "اضافة", name: "add", className: "add_button", action: function () {
             student.value = {};
             submitted.value = false;
             studentDialog.value = true;
@@ -90,7 +90,10 @@ onMounted(async () => {
     dt = table.value.dt;
     const response = await fetch('https://collegecm.work.gd/v1/students')
     if (!response.ok) throw new Error('Network response was not ok')
-    data.value = await response.json();
+    const jsonResponse = await response.json();
+    if (jsonResponse.students !== null) {
+      data.value = jsonResponse
+    }
   } catch (error) {
     console.error('Error fetching data:', error)
   }
@@ -99,11 +102,6 @@ onMounted(async () => {
 const student = ref({});
 const studentDialog = ref(false);
 const submitted = ref(false);
-const openStudentDialog = () => {
-  student.value = {};
-  submitted.value = false;
-  studentDialog.value = true;
-};
 const hideDialog = () => {
   studentDialog.value = false;
   submitted.value = false;
@@ -198,6 +196,8 @@ const deleteStudent = async () => {
       toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
       console.error(err);
     }
+  } else {
+    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
 // import
@@ -288,7 +288,7 @@ const handleFileUpload = async (event) => {
         <label for="state" class="block font-bold mb-3">الوضع</label>
         <Select id="state" v-model="student.state" :options="states" optionLabel="label" optionsValue="value"
           placeholder="اختر الفصل" fluid></Select>
-        <small v-if="submitted && !student.state" class="text-red-500">يجب ادخال الفصل</small>
+        <small v-if="submitted && !student.state" class="text-red-500">يجب ادخال الوضع</small>
       </div>
     </div>
     <template #footer>
@@ -309,7 +309,7 @@ table.dataTable thead th {
 }
 
 div.dt-buttons>.dt-button.excel_button,
-div.dt-buttons>.dt-button.add_student {
+div.dt-buttons>.dt-button.add_button {
   display: inline-flex;
   cursor: pointer;
   user-select: none;
@@ -330,7 +330,7 @@ div.dt-buttons>.dt-button.add_student {
   gap: var(--p-button-gap);
 }
 
-div.dt-buttons>.dt-button.add_student {
+div.dt-buttons>.dt-button.add_button {
   margin-left: 12px;
 }
 </style>
