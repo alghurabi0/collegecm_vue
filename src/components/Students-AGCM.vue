@@ -16,6 +16,7 @@ import InputNumber from 'primevue/inputnumber';
 import Select from 'primevue/select';
 import Dialog from 'primevue/dialog';
 import jszip from 'jszip';
+import { deleteExempt, getStudentData, deleteCarryover } from '@/controllers/students';
 
 DataTable.use(DataTablesCore);
 DataTablesCore.Buttons.jszip(jszip);
@@ -47,6 +48,10 @@ const cols = [
     orderable: false,
   },
 ]
+const carryoversCols = [
+  { data: 'subject_name', title: 'المادة' },
+  { data: null, render: '#action', title: '', orderable: false, },
+]
 const options = {
   colReorder: true,
   lengthMenu: [10, 50, 100, 500, { label: 'الكل', value: -1 }],
@@ -74,6 +79,15 @@ const options = {
       ],
     },
   },
+  language: {
+    url: "https://cdn.datatables.net/plug-ins/2.2.1/i18n/ar.json"
+  }
+}
+const carryoverOpts = {
+  responive: true,
+  autoWidth: true,
+  searching: false,
+  paging: false,
   language: {
     url: "https://cdn.datatables.net/plug-ins/2.2.1/i18n/ar.json"
   }
@@ -240,12 +254,79 @@ const handleFileUpload = async (event) => {
     fileInput.value.value = null;
   }
 }
+// extra
+const extraStudent = ref({});
+const extraDialog = ref(false);
+const openExtraDialg = async (index, rowData) => {
+  const studentData = await getStudentData(rowData.student_id);
+  if (studentData === null) {
+    toast.add({ severity: 'danger', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
+    return;
+  }
+  extraStudent.value = { ...studentData };
+  extraDialog.value = true;
+}
+const deleteCarryDialog = ref(false);
+const deleteExemptDialog = ref(false);
+const carryToDelete = ref(null);
+const exemptToDelete = ref(null);
+const confirmDeleteCarry = (rowData) => {
+  console.log('Carryover Row Data:', rowData);
+  if (rowData?.id) {
+    carryToDelete.value = rowData.id;
+    deleteCarryDialog.value = true;
+  } else {
+    toast.add({ severity: 'danger', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
+  }
+};
+const d1 = (rowData) => {
+  console.log('Exempt Row Data:', rowData);
+  if (rowData?.id) {
+    exemptToDelete.value = rowData.id;
+    deleteExemptDialog.value = true;
+  } else {
+    toast.add({ severity: 'danger', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
+  }
+};
+const deleteExtraCarry = async () => {
+  console.log('Deleting Carryover:', carryToDelete.value); // Debugging
+  if (carryToDelete.value) {
+    const res = await deleteCarryover(carryToDelete.value)
+    if (res !== true) {
+      toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
+    } else {
+      extraStudent.value.carryovers = extraStudent.value.carryovers.filter(val => val.id !== carryToDelete.value);
+      deleteCarryDialog.value = false;
+      carryToDelete.value = null;
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الحذف', life: 3000 });
+    }
+  } else {
+    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+  }
+};
+const deleteExtraExempt = async () => {
+  console.log('Deleting Exempt:', carryToDelete.value); // Debugging
+  if (exemptToDelete.value) {
+    const res = await deleteExempt(exemptToDelete.value)
+    if (res !== true) {
+      toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
+    } else {
+      extraStudent.value.exempteds = extraStudent.value.exempteds.filter(val => val.id !== exemptToDelete.value);
+      deleteExemptDialog.value = false;
+      exemptToDelete.value = null;
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الحذف', life: 3000 });
+    }
+  } else {
+    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+  }
+};
 </script>
 <template>
   <input type="file" ref="fileInput" hidden @change="handleFileUpload" accept=".csv" />
   <DataTable dir="rtl" :columns="cols" :data="data?.students" ref="table" :options="options" class="cell-border">
     <template #action="props">
-      <Button icon="pi pi-pencil" outlined rounded class=""
+      <Button icon="pi pi-info" outlined rounded @click="openExtraDialg(props.rowIndex, props.rowData)"></Button>
+      <Button icon="pi pi-pencil" outlined rounded class="mr-2"
         @click="editStudent(props.rowIndex, props.rowData)"></Button>
       <Button icon="pi pi-trash" outlined rounded severity="danger" class="mr-2"
         @click="confirmDeleteStudent(props.rowData)" />
@@ -295,6 +376,53 @@ const handleFileUpload = async (event) => {
       <Button label="الغاء" icon="pi pi-times" text @click="hideDialog" />
       <Button label="حفظ" icon="pi pi-check" @click="saveStudent" />
     </template>
+  </Dialog>
+  <Dialog dir="rtl" v-model:visible="extraDialog" class="w-11/12" :modal="true">
+    <div class="flex flex-row justify-around">
+      <h1>{{ extraStudent.student.student_name }}</h1>
+      <div class="flex flex-col">
+        <h1>{{ extraStudent.student.stage }}</h1>
+      </div>
+    </div>
+    <div id="carryovers">
+      <h1>التحميل</h1>
+      <DataTable :data="extraStudent?.carryovers" :columns="carryoversCols" dir="rtl" class="cell_bordered"
+        :options="carryoverOpts">
+        <template #action="props">
+          <Button icon="pi pi-trash" outlined rounded severity="danger" class="mr-2"
+            @click="confirmDeleteCarry(props.rowData)" />
+        </template>
+      </DataTable>
+      <Dialog v-model:visible="deleteCarryDialog" :style="{ width: '450px' }" header="Confirm Carry" :modal="true">
+        <div class="flex items-center gap-4">
+          <i class="pi pi-exclamation-triangle !text-3xl" />
+          <span v-if="extraStudent">؟<b>{{ extraStudent.student.student_name }}</b> هل انت متأكد من حذف</span>
+        </div>
+        <template #footer>
+          <Button label="لا" icon="pi pi-times" text @click="deleteCarryDialog = false" />
+          <Button label="نعم" icon="pi pi-check" @click="deleteExtraCarry" />
+        </template>
+      </Dialog>
+    </div>
+    <div id="exempted">
+      <h1>الاعفاء</h1>
+      <DataTable :data="extraStudent?.exempteds" :columns="carryoversCols" dir="rtl" class="cell_bordered"
+        :options="carryoverOpts">
+        <template #action="props">
+          <Button icon="pi pi-trash" outlined rounded severity="danger" class="mr-2" @click="d1(props.rowData)" />
+        </template>
+      </DataTable>
+      <Dialog v-model:visible="deleteExemptDialog" :style="{ width: '450px' }" header="Confirm Exempt" :modal="true">
+        <div class="flex items-center gap-4">
+          <i class="pi pi-exclamation-triangle !text-3xl" />
+          <span v-if="extraStudent">؟<b>{{ extraStudent.student.student_name }}</b> هل انت متأكد من حذف</span>
+        </div>
+        <template #footer>
+          <Button label="لا" icon="pi pi-times" text @click="deleteExemptDialog = false" />
+          <Button label="نعم" icon="pi pi-check" @click="deleteExtraExempt" />
+        </template>
+      </Dialog>
+    </div>
   </Dialog>
 </template>
 

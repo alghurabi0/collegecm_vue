@@ -9,6 +9,7 @@ import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
 import jszip from 'jszip';
+import { deleteCarryover } from '@/controllers/students';
 
 DataTable.use(DataTablesCore);
 DataTablesCore.Buttons.jszip(jszip);
@@ -127,24 +128,16 @@ const confirmDeleteCarryover = (carry) => {
   carryover.value = carry;
   deleteCarryoverDialog.value = true;
 };
-const deleteCarryover = async () => {
+const deleteCarryover1 = async () => {
   if (carryover?.value.id) {
-    try {
-      const response = await fetch(`https://collegecm.work.gd/v1/carryovers/${carryover.value.id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast.add({ severity: 'danger', summary: 'Fail', details: errorData.error || 'حدث خطأ', life: 10000 });
-      } else {
-        data.value.carryovers = data.value.carryovers.filter(val => val.id !== carryover.value.id);
-        deleteCarryoverDialog.value = false;
-        carryover.value = {};
-        toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الحذف', life: 3000 });
-      }
-    } catch (err) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
-      console.error(err);
+    const res = await deleteCarryover(carryover.value.id)
+    if (res !== true) {
+      toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
+    } else {
+      data.value.carryovers = data.value.carryovers.filter(val => val.id !== carryover.value.id);
+      deleteCarryoverDialog.value = false;
+      carryover.value = {};
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الحذف', life: 3000 });
     }
   } else {
     toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
@@ -166,7 +159,7 @@ const deleteCarryover = async () => {
     </div>
     <template #footer>
       <Button label="لا" icon="pi pi-times" text @click="deleteCarryoverDialog = false" />
-      <Button label="نعم" icon="pi pi-check" @click="deleteCarryover" />
+      <Button label="نعم" icon="pi pi-check" @click="deleteCarryover1" />
     </template>
   </Dialog>
   <Dialog dir="rtl" v-model:visible="carryoverDialog" class="w-4/5 md:w-3/5" header="التفاصيل" :modal="true">
