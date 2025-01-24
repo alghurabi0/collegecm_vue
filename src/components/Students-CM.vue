@@ -12,6 +12,7 @@ import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Select from 'primevue/select';
 import Dialog from 'primevue/dialog';
+import Toast from 'primevue/toast';
 
 // extras
 const toast = useToast();
@@ -204,6 +205,7 @@ const exportCSV = () => {
 };
 </script>
 <template>
+  <Toast />
   <Toolbar class="mb-6">
     <template #start>
       <Button label="اضافة" icon="pi pi-plus" class="mr-2" @click="openNew" />

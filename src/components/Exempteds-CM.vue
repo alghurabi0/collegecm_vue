@@ -4,7 +4,8 @@ import DataTable from 'datatables.net-vue3';
 import DataTablesCore from 'datatables.net-dt';
 import 'datatables.net-colreorder-dt';
 import 'datatables.net-responsive-dt';
-import { useToast } from 'primevue';
+import { useToast } from 'primevue/usetoast';
+import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
@@ -142,6 +143,7 @@ const deleteExempted = async () => {
 };
 </script>
 <template>
+  <Toast />
   <DataTable dir="rtl" :columns="cols" :data="data?.exempteds" ref="table" :options="options" class="cell-border">
     <template #action="props">
       <Button icon="pi pi-trash" outlined rounded severity="danger" class="mr-2"

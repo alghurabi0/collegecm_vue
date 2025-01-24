@@ -10,13 +10,14 @@ import 'datatables.net-buttons/js/buttons.html5';
 //import InputIcon from 'primevue/inputicon';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
-import { useToast } from 'primevue';
+import { useToast } from 'primevue/usetoast';
+import Toast from 'primevue/toast';
 //import Toolbar from 'primevue/toolbar';
 import InputNumber from 'primevue/inputnumber';
 import Select from 'primevue/select';
 import Dialog from 'primevue/dialog';
 import jszip from 'jszip';
-import { deleteExempt, getStudentData, deleteCarryover, addCarryover, addExempt, deleteMark, addMark } from '@/controllers/students';
+import { deleteExempt, getStudentData, deleteCarryover, addCarryover, addExempt, deleteMark, addMark, editMark } from '@/controllers/students';
 
 DataTable.use(DataTablesCore);
 DataTablesCore.Buttons.jszip(jszip);
@@ -229,13 +230,11 @@ const marksOpts = {
         {
           text: "حفظ", name: "save_mark_button", className: "save_mark_button", action: async function () {
             markSubmitted.value = true;
-            console.log(mark.value);
             if (
               !mark?.value.subject ||
               mark?.value.semester_mark < 0 ||
               mark?.value.final_mark < 0
             ) {
-              console.log("invalid mark")
               toast.add({
                 severity: 'warn',
                 summary: 'Validation Failed',
@@ -244,24 +243,41 @@ const marksOpts = {
               });
               return; // Exit early if validation fails
             }
-            const markData = {
-              student_id: extraStudent.value.student.student_id,
-              subject_id: mark.value.subject.subject_id,
-              semester_mark: mark.value.semester_mark,
-              final_mark: mark.value.final_mark,
-            };
-            const { newMark, err } = await addMark(markData);
-            if (err !== null) {
-              toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
-              return;
-            } else if (newMark) {
-              if (!Array.isArray(extraStudent.value.marks)) {
-                extraStudent.value.marks = [];
+            if (!mark.value.id && !mark.value.index) {
+              const markData = {
+                student_id: extraStudent.value.student.student_id,
+                subject_id: mark.value.subject.subject_id,
+                semester_mark: mark.value.semester_mark,
+                final_mark: mark.value.final_mark,
+              };
+              const { newMark, err } = await addMark(markData);
+              if (err !== null) {
+                toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+                return;
+              } else if (newMark) {
+                if (!Array.isArray(extraStudent.value.marks)) {
+                  extraStudent.value.marks = [];
+                }
+                extraStudent.value.marks.push(newMark);
+                toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
+                mark.value = {};
+                markSubmitted.value = false;
               }
-              extraStudent.value.marks.push(newMark);
-              toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
-              mark.value = {};
-              markSubmitted.value = false;
+            } else {
+              const markData = {
+                semester_mark: mark.value.semester_mark,
+                final_mark: mark.value.final_mark,
+              };
+              const { newMark, err } = await editMark(mark.value.id, markData);
+              if (err !== null) {
+                toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+                return;
+              } else if (newMark) {
+                extraStudent.value.marks.splice(mark.value.index, 1, newMark);
+                toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
+                mark.value = {};
+                markSubmitted.value = false;
+              }
             }
           }
         },
@@ -334,7 +350,7 @@ const saveStudent = async () => {
         toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
         console.log(err);
       }
-    } else if (student.value.seq_in_college && student.value.index) {
+    } else if (student.value.seq_in_college && student.value.index >= 0) {
       try {
         const { index, seq_in_college, ...dataToSend } = student.value
         const response = await fetch(`https://collegecm.work.gd/v1/students/${student.value.student_id}`, {
@@ -359,13 +375,15 @@ const saveStudent = async () => {
         console.log(err);
       }
     }
+  } else {
+    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
 // update
 const editStudent = (index, rowData) => {
   student.value = { index, ...rowData };
-  student.value.state = states.value.find((state) => state.value = student.value.state);
-  student.value.stage = stages.value.find((stage) => stage.value = student.value.stage);
+  student.value.state = states.value.find((state) => state.value === student.value.state);
+  student.value.stage = stages.value.find((stage) => stage.value === student.value.stage);
   studentDialog.value = true;
 }
 // delete
@@ -524,6 +542,12 @@ const deleteExtraMark = async () => {
     toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
+const updateMark = (index, rowData) => {
+  mark.value = { index, ...rowData };
+  mark.value.subject = extraStudent.value.subjects.find((sub) => sub.subject_name === mark.value.subject_name);
+  console.log(mark.value);
+  addMarkSelect.value = true;
+}
 const addCarrySelect = ref(false);
 const addExemptSelect = ref(false);
 const addMarkSelect = ref(false);
@@ -535,6 +559,7 @@ const exemptSubmitted = ref(false);
 const markSubmitted = ref(false);
 </script>
 <template>
+  <Toast />
   <input type="file" ref="fileInput" hidden @change="handleFileUpload" accept=".csv" />
   <DataTable dir="rtl" :columns="cols" :data="data?.students" ref="table" :options="options" class="cell-border">
     <template #action="props">
@@ -564,8 +589,8 @@ const markSubmitted = ref(false);
       </div>
       <div>
         <label for="stage" class="block font-bold mb-3">المرحلة</label>
-        <Select id="stage" v-model="student.stage" :options="stages" optionLabel="label" optionsValue="value"
-          placeholder="اختر المرحلة" fluid></Select>
+        <Select id="stage" v-model="student.stage" :options="stages" optionLabel="label" placeholder="اختر المرحلة"
+          fluid></Select>
         <small v-if="submitted && !student.stage" class="text-red-500">يجب ادخال المرحلة</small>
       </div>
       <div>
@@ -672,6 +697,8 @@ const markSubmitted = ref(false);
       <h1>الدرجات</h1>
       <DataTable :data="extraStudent?.marks" :columns="marksCols" dir="rtl" class="cell_bordere" :options="marksOpts">
         <template #mark_action="props">
+          <Button icon="pi pi-pencil" outlined rounded class="mr-2"
+            @click="updateMark(props.rowIndex, props.rowData)"></Button>
           <Button id="delete_exempt" icon="pi pi-trash" outlined rounded severity="danger" class="mr-2 delete-exempted"
             @click="confirmDeleteMark(props.rowData)" />
         </template>

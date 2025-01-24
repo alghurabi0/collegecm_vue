@@ -4,13 +4,14 @@ import DataTable from 'datatables.net-vue3';
 import DataTablesCore from 'datatables.net-dt';
 import 'datatables.net-colreorder-dt';
 import 'datatables.net-responsive-dt';
-import { useToast } from 'primevue';
+import { useToast } from 'primevue/usetoast';
+import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
 import InputNumber from 'primevue/inputnumber';
 import jszip from 'jszip';
-import { addMark } from '@/controllers/students';
+import { addMark, editMark } from '@/controllers/students';
 
 DataTable.use(DataTablesCore);
 DataTablesCore.Buttons.jszip(jszip);
@@ -27,6 +28,8 @@ const cols = [
   { data: 'student_name', title: 'اسم الطالب' },
   { data: 'subject_name', title: 'المادة' },
   { data: 'semester_mark', title: 'درجة السعي' },
+  { data: 'max_semester_mark', title: 'درجة السعي القصوى' },
+  { data: 'max_final_exam', title: 'درجة النهائي القصوى' },
   { data: 'final_mark', title: 'درجة الامتحان النهائي' },
   {
     data: null,
@@ -126,29 +129,17 @@ const saveMark = async () => {
       mark.value = {};
     }
   } else {
-    const { index, id, student_name, subject_name, student_id, subject_id, ...dataToSend } = mark.value;
-    try {
-      const response = await fetch(`https://collegecm.work.gd/v1/marks/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(dataToSend),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast.add({ severity: 'danger', summary: 'Fail', details: errorData.error || 'حدث خطأ', life: 10000 });
-      } else {
-        const newMark = await response.json();
-        data.value.marks.splice(index, 1, newMark.mark);
-        toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
-        markDialog.value = false;
-        mark.value = {};
-      }
-    } catch (err) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
-      console.log(err);
-
+    const {
+      index, id, student_name, subject_name, student_id,
+      subject_id, max_semester_mark, max_final_exam, ...dataToSend } = mark.value;
+    const { newMark, err } = await editMark(id, dataToSend);
+    if (err !== null) {
+      toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+    } else if (newMark) {
+      data.value.marks.splice(index, 1, newMark);
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
+      markDialog.value = false;
+      mark.value = {};
     }
   }
 }
@@ -182,6 +173,7 @@ const deleteMark = async () => {
 };
 </script>
 <template>
+  <Toast />
   <DataTable dir="rtl" :columns="cols" :data="data?.marks" ref="table" :options="options" class="cell-border">
     <template #action="props">
       <Button icon="pi pi-pencil" outlined rounded class=""

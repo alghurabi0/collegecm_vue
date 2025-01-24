@@ -146,3 +146,28 @@ export async function addMark(obj) {
     return { newMark: null, err: 'حدث خطأ' };
   }
 }
+
+export async function editMark(id, obj) {
+  if (!id) {
+    return { newMark: null, err: 'حدث خطأ' };
+  }
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/marks/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(obj),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { newMark: null, err: errorData.error };
+    } else {
+      const newMark = await response.json();
+      return { newMark: newMark.mark, err: null };
+    }
+  } catch (err) {
+    console.log(err);
+    return { newMark: null, err: 'حدث خطأ' };
+  }
+}

@@ -12,6 +12,7 @@ import Toolbar from 'primevue/toolbar';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import { useToast } from 'primevue/usetoast';
+import Toast from 'primevue/toast';
 //import ColumnGroup from 'primevue/columngroup';   // optional
 // import Row from 'primevue/row';                   // optional
 import { ref, onMounted, computed } from 'vue'
@@ -222,6 +223,7 @@ const exportCSV = () => {
 </script>
 
 <template>
+  <Toast />
   <Toolbar class="mb-6">
     <template #start>
       <Button label="اضافة" icon="pi pi-plus" class="mr-2" @click="openNew" />
