@@ -16,7 +16,7 @@ import InputNumber from 'primevue/inputnumber';
 import Select from 'primevue/select';
 import Dialog from 'primevue/dialog';
 import jszip from 'jszip';
-import { deleteExempt, getStudentData, deleteCarryover } from '@/controllers/students';
+import { deleteExempt, getStudentData, deleteCarryover, addCarryover, addExempt, deleteMark, addMark } from '@/controllers/students';
 
 DataTable.use(DataTablesCore);
 DataTablesCore.Buttons.jszip(jszip);
@@ -50,7 +50,19 @@ const cols = [
 ]
 const carryoversCols = [
   { data: 'subject_name', title: 'المادة' },
-  { data: null, render: '#action', title: '', orderable: false, },
+  { data: null, render: '#carry_action', title: '', orderable: false, },
+]
+const exemptedCols = [
+  { data: 'subject_name', title: 'المادة' },
+  { data: null, render: '#exempt_action', title: '', orderable: false, },
+]
+const marksCols = [
+  { data: 'subject_name', title: 'المادة' },
+  { data: 'semester_mark', title: 'السعي' },
+  { data: 'max_semester_mark', title: 'درجة السعي القصوى' },
+  { data: 'final_mark', title: 'درجة الامتحان النهائي' },
+  { data: 'max_final_exam', title: 'درجة النهائي القصوى' },
+  { data: null, render: '#mark_action', title: '', orderable: false },
 ]
 const options = {
   colReorder: true,
@@ -90,7 +102,178 @@ const carryoverOpts = {
   paging: false,
   language: {
     url: "https://cdn.datatables.net/plug-ins/2.2.1/i18n/ar.json"
-  }
+  },
+  layout: {
+    bottomStart: {},
+    bottomEnd: {
+      buttons: [
+        {
+          text: "اضافة", name: "add_carryover_button", className: "add_carry_button", action: function () {
+            if (!addCarrySelect.value) {
+              addCarrySelect.value = true;
+            }
+          }
+        },
+        {
+          text: "حفظ", name: "save_carryover_button", className: "save_carry_button", action: async function () {
+            carrySubmitted.value = true;
+            if (carryover.value.subject) {
+              const carryData = {
+                student_id: extraStudent.value.student.student_id,
+                subject_id: carryover.value.subject.subject_id,
+              };
+              const { newCarryover, err } = await addCarryover(carryData);
+              if (err !== null) {
+                toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+                return;
+              } else if (newCarryover) {
+                if (!Array.isArray(extraStudent.value.carryovers)) {
+                  extraStudent.value.carryovers = [];
+                }
+                extraStudent.value.carryovers.push(newCarryover);
+                toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
+                carryover.value = {};
+                carrySubmitted.value = false;
+              }
+            } else {
+              toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+              return;
+            }
+          }
+        },
+        {
+          text: "الغاء", name: "cancel_carryover_button", className: "cancel_carry_button", action: function () {
+            carryover.value = ref({});
+            addCarrySelect.value = false;
+          }
+        },
+      ]
+    }
+  },
+}
+const exemptedOpts = {
+  responive: true,
+  autoWidth: true,
+  searching: false,
+  paging: false,
+  language: {
+    url: "https://cdn.datatables.net/plug-ins/2.2.1/i18n/ar.json"
+  },
+  layout: {
+    bottomStart: {},
+    bottomEnd: {
+      buttons: [
+        {
+          text: "اضافة", name: "add_exempted_button", className: "add_exempt_button", action: function () {
+            if (!addExemptSelect.value) {
+              addExemptSelect.value = true;
+            }
+          }
+        },
+        {
+          text: "حفظ", name: "save_exempted_button", className: "save_exempt_button", action: async function () {
+            exemptSubmitted.value = true;
+            if (exempt.value.subject) {
+              const exemptData = {
+                student_id: extraStudent.value.student.student_id,
+                subject_id: exempt.value.subject.subject_id,
+              };
+              const { newExempt, err } = await addExempt(exemptData);
+              if (err !== null) {
+                toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+                return;
+              } else if (newExempt) {
+                if (!Array.isArray(extraStudent.value.exempteds)) {
+                  extraStudent.value.exempteds = [];
+                }
+                extraStudent.value.exempteds.push(newExempt);
+                toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
+                exempt.value = {};
+                exemptSubmitted.value = false;
+              }
+            } else {
+              toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+              return;
+            }
+          }
+        },
+        {
+          text: "الغاء", name: "cancel_exempted_button", className: "cancel_exempt_button", action: function () {
+            exempt.value = ref({});
+            addExemptSelect.value = false;
+          }
+        },
+      ]
+    }
+  },
+}
+const marksOpts = {
+  response: true,
+  autoWidth: true,
+  searching: false,
+  paging: false,
+  language: {
+    url: "https://cdn.datatables.net/plug-ins/2.2.1/i18n/ar.json"
+  },
+  layout: {
+    bottomStart: {},
+    bottomEnd: {
+      buttons: [
+        {
+          text: "اضافة", name: "add_mark_button", className: "add_mark_button", action: function () {
+            if (!addMarkSelect.value) {
+              addMarkSelect.value = true;
+            }
+          }
+        },
+        {
+          text: "حفظ", name: "save_mark_button", className: "save_mark_button", action: async function () {
+            markSubmitted.value = true;
+            console.log(mark.value);
+            if (
+              !mark?.value.subject ||
+              mark?.value.semester_mark < 0 ||
+              mark?.value.final_mark < 0
+            ) {
+              console.log("invalid mark")
+              toast.add({
+                severity: 'warn',
+                summary: 'Validation Failed',
+                detail: 'تأكد من تعبئة جميع الحقول بشكل صحيح',
+                life: 5000,
+              });
+              return; // Exit early if validation fails
+            }
+            const markData = {
+              student_id: extraStudent.value.student.student_id,
+              subject_id: mark.value.subject.subject_id,
+              semester_mark: mark.value.semester_mark,
+              final_mark: mark.value.final_mark,
+            };
+            const { newMark, err } = await addMark(markData);
+            if (err !== null) {
+              toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+              return;
+            } else if (newMark) {
+              if (!Array.isArray(extraStudent.value.marks)) {
+                extraStudent.value.marks = [];
+              }
+              extraStudent.value.marks.push(newMark);
+              toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
+              mark.value = {};
+              markSubmitted.value = false;
+            }
+          }
+        },
+        {
+          text: "الغاء", name: "cancel_mark_button", className: "cancel_mark_button", action: function () {
+            mark.value = ref({});
+            addMarkSelect.value = false;
+          }
+        },
+      ]
+    }
+  },
 }
 let dt;
 const table = ref();
@@ -268,10 +451,11 @@ const openExtraDialg = async (index, rowData) => {
 }
 const deleteCarryDialog = ref(false);
 const deleteExemptDialog = ref(false);
+const deleteMarkDialog = ref(false);
 const carryToDelete = ref(null);
 const exemptToDelete = ref(null);
+const markToDelete = ref(null);
 const confirmDeleteCarry = (rowData) => {
-  console.log('Carryover Row Data:', rowData);
   if (rowData?.id) {
     carryToDelete.value = rowData.id;
     deleteCarryDialog.value = true;
@@ -280,7 +464,6 @@ const confirmDeleteCarry = (rowData) => {
   }
 };
 const d1 = (rowData) => {
-  console.log('Exempt Row Data:', rowData);
   if (rowData?.id) {
     exemptToDelete.value = rowData.id;
     deleteExemptDialog.value = true;
@@ -288,8 +471,15 @@ const d1 = (rowData) => {
     toast.add({ severity: 'danger', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
   }
 };
+const confirmDeleteMark = (rowData) => {
+  if (rowData?.id) {
+    markToDelete.value = rowData.id;
+    deleteMarkDialog.value = true;
+  } else {
+    toast.add({ severity: 'danger', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
+  }
+}
 const deleteExtraCarry = async () => {
-  console.log('Deleting Carryover:', carryToDelete.value); // Debugging
   if (carryToDelete.value) {
     const res = await deleteCarryover(carryToDelete.value)
     if (res !== true) {
@@ -305,7 +495,6 @@ const deleteExtraCarry = async () => {
   }
 };
 const deleteExtraExempt = async () => {
-  console.log('Deleting Exempt:', carryToDelete.value); // Debugging
   if (exemptToDelete.value) {
     const res = await deleteExempt(exemptToDelete.value)
     if (res !== true) {
@@ -320,6 +509,30 @@ const deleteExtraExempt = async () => {
     toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
+const deleteExtraMark = async () => {
+  if (markToDelete.value) {
+    const res = await deleteMark(markToDelete.value)
+    if (res !== true) {
+      toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
+    } else {
+      extraStudent.value.marks = extraStudent.value.marks.filter(val => val.id !== markToDelete.value);
+      deleteMarkDialog.value = false;
+      markToDelete.value = null;
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الحذف', life: 3000 });
+    }
+  } else {
+    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+  }
+};
+const addCarrySelect = ref(false);
+const addExemptSelect = ref(false);
+const addMarkSelect = ref(false);
+const carryover = ref({});
+const exempt = ref({});
+const mark = ref({});
+const carrySubmitted = ref(false);
+const exemptSubmitted = ref(false);
+const markSubmitted = ref(false);
 </script>
 <template>
   <input type="file" ref="fileInput" hidden @change="handleFileUpload" accept=".csv" />
@@ -384,15 +597,30 @@ const deleteExtraExempt = async () => {
         <h1>{{ extraStudent.student.stage }}</h1>
       </div>
     </div>
+
     <div id="carryovers">
       <h1>التحميل</h1>
       <DataTable :data="extraStudent?.carryovers" :columns="carryoversCols" dir="rtl" class="cell_bordered"
         :options="carryoverOpts">
-        <template #action="props">
-          <Button icon="pi pi-trash" outlined rounded severity="danger" class="mr-2"
+        <template #carry_action="props">
+          <Button id="delete_carry" icon="pi pi-trash" outlined rounded severity="danger" class="mr-2 delete-carryover"
             @click="confirmDeleteCarry(props.rowData)" />
         </template>
       </DataTable>
+      <div id="add_carry">
+        <Select id="subject_name" v-if="addCarrySelect" v-model="carryover.subject" :options="extraStudent?.subjects"
+          optionLabel="subject_name" filter placeholder="اختر المادة" fluid
+          :invalid="carrySubmitted && !carryover.subject" required="true">
+          <template #value="slotProps">
+            <div v-if="slotProps.value">{{ slotProps.value.subject_name }}</div>
+            <span v-else>{{ slotProps.placeholder }}</span>
+          </template>
+          <template #option="slotProps">
+            <div>{{ slotProps.option.subject_name }}</div>
+          </template>
+        </Select>
+        <small v-if="carrySubmitted && !carryover.subject" class="text-red-500">يجب ادخال اسم المادة</small>
+      </div>
       <Dialog v-model:visible="deleteCarryDialog" :style="{ width: '450px' }" header="Confirm Carry" :modal="true">
         <div class="flex items-center gap-4">
           <i class="pi pi-exclamation-triangle !text-3xl" />
@@ -404,14 +632,30 @@ const deleteExtraExempt = async () => {
         </template>
       </Dialog>
     </div>
+
     <div id="exempted">
       <h1>الاعفاء</h1>
-      <DataTable :data="extraStudent?.exempteds" :columns="carryoversCols" dir="rtl" class="cell_bordered"
-        :options="carryoverOpts">
-        <template #action="props">
-          <Button icon="pi pi-trash" outlined rounded severity="danger" class="mr-2" @click="d1(props.rowData)" />
+      <DataTable :data="extraStudent?.exempteds" :columns="exemptedCols" dir="rtl" class="cell_bordered"
+        :options="exemptedOpts">
+        <template #exempt_action="props">
+          <Button id="delete_exempt" icon="pi pi-trash" outlined rounded severity="danger" class="mr-2 delete-exempted"
+            @click="d1(props.rowData)" />
         </template>
       </DataTable>
+      <div id="add_exempt">
+        <Select id="subject_name" v-if="addExemptSelect" v-model="exempt.subject" :options="extraStudent?.subjects"
+          optionLabel="subject_name" filter placeholder="اختر المادة" fluid
+          :invalid="exemptSubmitted && !exempt.subject" required="true">
+          <template #value="slotProps">
+            <div v-if="slotProps.value">{{ slotProps.value.subject_name }}</div>
+            <span v-else>{{ slotProps.placeholder }}</span>
+          </template>
+          <template #option="slotProps">
+            <div>{{ slotProps.option.subject_name }}</div>
+          </template>
+        </Select>
+        <small v-if="exemptSubmitted && !exempt.subject" class="text-red-500">يجب ادخال اسم المادة</small>
+      </div>
       <Dialog v-model:visible="deleteExemptDialog" :style="{ width: '450px' }" header="Confirm Exempt" :modal="true">
         <div class="flex items-center gap-4">
           <i class="pi pi-exclamation-triangle !text-3xl" />
@@ -423,6 +667,56 @@ const deleteExtraExempt = async () => {
         </template>
       </Dialog>
     </div>
+
+    <div id="marks">
+      <h1>الدرجات</h1>
+      <DataTable :data="extraStudent?.marks" :columns="marksCols" dir="rtl" class="cell_bordere" :options="marksOpts">
+        <template #mark_action="props">
+          <Button id="delete_exempt" icon="pi pi-trash" outlined rounded severity="danger" class="mr-2 delete-exempted"
+            @click="confirmDeleteMark(props.rowData)" />
+        </template>
+      </DataTable>
+      <div id="add_mark" class="flex flex-row">
+        <div>
+          <label v-if="addMarkSelect" for="subject_name" class="block font-bold mb-3">المادة</label>
+          <Select id="subject_name" v-if="addMarkSelect" v-model="mark.subject" :options="extraStudent?.subjects"
+            optionLabel="subject_name" filter placeholder="اختر المادة" fluid :invalid="markSubmitted && !mark.subject"
+            required="true">
+            <template #value="slotProps">
+              <div v-if="slotProps.value">{{ slotProps.value.subject_name }}</div>
+              <span v-else>{{ slotProps.placeholder }}</span>
+            </template>
+            <template #option="slotProps">
+              <div>{{ slotProps.option.subject_name }}</div>
+            </template>
+          </Select>
+          <small v-if="markSubmitted && !mark.subject" class="text-red-500">يجب ادخال اسم المادة</small>
+        </div>
+        <div>
+          <label v-if="addMarkSelect" for="semester_mark" class="block font-bold mb-3">درجة السعي</label>
+          <InputNumber v-if="addMarkSelect" id="semester_mark" v-model.trim.number="mark.semester_mark"
+            :invalid="markSubmitted && mark.semester_mark < 0" fluid />
+          <small v-if="markSubmitted && mark.semester_mark < 0" class="text-red-500">يجب ان يكون صفر او اكبر</small>
+        </div>
+        <div>
+          <label v-if="addMarkSelect" for="final_mark" class="block font-bold mb-3">درجة الامتحان النهائي</label>
+          <InputNumber v-if="addMarkSelect" id="final_mark" v-model.trim.number="mark.final_mark"
+            :invalid="markSubmitted && mark.final_mark < 0" fluid />
+          <small v-if="markSubmitted && mark.final_mark < 0" class="text-red-500">يجب ان يكون صفر او اكبر</small>
+        </div>
+      </div>
+      <Dialog v-model:visible="deleteMarkDialog" :style="{ width: '450px' }" header="Confirm Mark" :modal="true">
+        <div class="flex items-center gap-4">
+          <i class="pi pi-exclamation-triangle !text-3xl" />
+          <span v-if="extraStudent">؟<b>{{ extraStudent.student.student_name }}</b> هل انت متأكد من حذف</span>
+        </div>
+        <template #footer>
+          <Button label="لا" icon="pi pi-times" text @click="deleteMarkDialog = false" />
+          <Button label="نعم" icon="pi pi-check" @click="deleteExtraMark" />
+        </template>
+      </Dialog>
+    </div>
+
   </Dialog>
 </template>
 

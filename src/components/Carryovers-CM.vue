@@ -9,7 +9,7 @@ import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
 import jszip from 'jszip';
-import { deleteCarryover } from '@/controllers/students';
+import { addCarryover, deleteCarryover } from '@/controllers/students';
 
 DataTable.use(DataTablesCore);
 DataTablesCore.Buttons.jszip(jszip);
@@ -95,31 +95,20 @@ const saveCarryover = async () => {
     carryover.value.student_id = carryover.value.student_name.student_id;
     carryover.value.subject_id = carryover.value.subject_name.subject_id;
     const { student_name, subject_name, ...dataToSend } = carryover.value;
-    try {
-      const response = await fetch('https://collegecm.work.gd/v1/carryovers', {
-        method: 'POST',
-        body: JSON.stringify(dataToSend),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast.add({ severity: 'danger', summary: 'Fail', details: errorData.error || 'حدث خطأ', life: 10000 });
-      } else {
-        if (!Array.isArray(data.value.carryovers)) {
-          data.value.carryovers = [];
-        }
-        const newCarryover = await response.json();
-        data.value.carryovers.push(newCarryover.carryover);
-        toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
-        carryoverDialog.value = false;
-        carryover.value = {};
+    const { newCarryover, err } = await addCarryover(dataToSend);
+    if (err !== null) {
+      toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+    } else if (newCarryover) {
+      if (!Array.isArray(data.value.carryovers)) {
+        data.value.carryovers = [];
       }
-    } catch (err) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
-      console.log(err);
+      data.value.carryovers.push(newCarryover);
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
+      carryoverDialog.value = false;
+      carryover.value = {};
     }
+  } else {
+    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 }
 // delete

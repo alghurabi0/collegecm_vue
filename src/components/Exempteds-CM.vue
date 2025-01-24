@@ -9,6 +9,7 @@ import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
 import jszip from 'jszip';
+import { addExempt } from '@/controllers/students';
 
 DataTable.use(DataTablesCore);
 DataTablesCore.Buttons.jszip(jszip);
@@ -94,31 +95,20 @@ const saveExempted = async () => {
     exempted.value.student_id = exempted.value.student_name.student_id;
     exempted.value.subject_id = exempted.value.subject_name.subject_id;
     const { student_name, subject_name, ...dataToSend } = exempted.value;
-    try {
-      const response = await fetch('https://collegecm.work.gd/v1/exempteds', {
-        method: 'POST',
-        body: JSON.stringify(dataToSend),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast.add({ severity: 'danger', summary: 'Fail', details: errorData.error || 'حدث خطأ', life: 10000 });
-      } else {
-        if (!Array.isArray(data.value.exempteds)) {
-          data.value.exempteds = [];
-        }
-        const newExempted = await response.json();
-        data.value.exempteds.push(newExempted.exempted);
-        toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
-        exemptedDialog.value = false;
-        exempted.value = {};
+    const { newExempt, err } = await addExempt(dataToSend);
+    if (err !== null) {
+      toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+    } else if (newExempt) {
+      if (!Array.isArray(data.value.exempteds)) {
+        data.value.exempteds = [];
       }
-    } catch (err) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
-      console.log(err);
+      data.value.exempteds.push(newExempt);
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
+      exemptedDialog.value = false;
+      exempted.value = {};
     }
+  } else {
+    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 }
 // delete

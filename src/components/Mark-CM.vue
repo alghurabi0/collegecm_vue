@@ -10,6 +10,7 @@ import Button from 'primevue/button';
 import Select from 'primevue/select';
 import InputNumber from 'primevue/inputnumber';
 import jszip from 'jszip';
+import { addMark } from '@/controllers/students';
 
 DataTable.use(DataTablesCore);
 DataTablesCore.Buttons.jszip(jszip);
@@ -111,31 +112,18 @@ const saveMark = async () => {
     mark.value.student_id = mark.value.student_name.student_id;
     mark.value.subject_id = mark.value.subject_name.subject_id;
     const { student_name, subject_name, ...dataToSend } = mark.value;
-    try {
-      const response = await fetch('https://collegecm.work.gd/v1/marks', {
-        method: 'POST',
-        body: JSON.stringify(dataToSend),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast.add({ severity: 'danger', summary: 'Fail', details: errorData.error || 'حدث خطأ', life: 10000 });
-      } else {
-        if (!Array.isArray(data.value.marks)) {
-          data.value.marks = [];
-        }
-        const newMark = await response.json();
-        data.value.marks.push(newMark.mark);
-        toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
-        markDialog.value = false;
-        mark.value = {};
+    const { newMark, err } = await addMark(dataToSend);
+    if (err !== null) {
+      toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+      return;
+    } else if (newMark) {
+      if (!Array.isArray(data.value.marks)) {
+        data.value.marks = [];
       }
-    } catch (err) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
-      console.log(err);
-
+      data.value.marks.push(newMark);
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
+      markDialog.value = false;
+      mark.value = {};
     }
   } else {
     const { index, id, student_name, subject_name, student_id, subject_id, ...dataToSend } = mark.value;
@@ -179,22 +167,14 @@ const confirmDeleteMark = (carry) => {
 };
 const deleteMark = async () => {
   if (mark?.value.id) {
-    try {
-      const response = await fetch(`https://collegecm.work.gd/v1/marks/${mark.value.id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast.add({ severity: 'danger', summary: 'Fail', details: errorData.error || 'حدث خطأ', life: 10000 });
-      } else {
-        data.value.marks = data.value.marks.filter(val => val.id !== mark.value.id);
-        deleteMarkDialog.value = false;
-        mark.value = {};
-        toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الحذف', life: 3000 });
-      }
-    } catch (err) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
-      console.error(err);
+    const res = await deleteMark(mark.value.id);
+    if (res !== true) {
+      toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
+    } else {
+      data.value.marks = data.value.marks.filter(val => val.id !== mark.value.id);
+      deleteMarkDialog.value = false;
+      mark.value = {};
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الحذف', life: 3000 });
     }
   } else {
     toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
@@ -253,8 +233,8 @@ const deleteMark = async () => {
           :invalid="submitted && mark.semester_mark < 0" fluid />
         <small v-if="submitted && mark.semester_mark < 0" class="text-red-500">يجب ان يكون صفر او اكبر</small>
         <label for="final_mark" class="block font-bold mb-3">درجة الامتحان النهائي</label>
-        <InputNumber id="semester_mark" v-model.trim.number="mark.final_mark"
-          :invalid="submitted && mark.final_mark < 0" fluid />
+        <InputNumber id="final_mark" v-model.trim.number="mark.final_mark" :invalid="submitted && mark.final_mark < 0"
+          fluid />
         <small v-if="submitted && mark.final_mark < 0" class="text-red-500">يجب ان يكون صفر او اكبر</small>
       </div>
     </div>
