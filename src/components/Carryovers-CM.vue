@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import DataTable from 'datatables.net-vue3';
 import DataTablesCore from 'datatables.net-dt';
 import 'datatables.net-colreorder-dt';
@@ -10,16 +11,18 @@ import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
 import jszip from 'jszip';
-import { addCarryover, deleteCarryover } from '@/controllers/students';
+import { addCarryover, deleteCarryover, getCarryovers, getStudents, getSubjects } from '@/controllers/students';
 
 DataTable.use(DataTablesCore);
 DataTablesCore.Buttons.jszip(jszip);
 // global
-const data = ref(null)
+const data = ref({})
 const carryover = ref({});
 const students = ref(null);
 const subjects = ref(null);
+const route = useRoute();
 const toast = useToast();
+const info = { year: route.params.year, stage: route.params.stage };
 let dt;
 const table = ref();
 const cols = [
@@ -61,26 +64,38 @@ const options = {
 }
 // getting
 onMounted(async () => {
-  try {
-    dt = table.value.dt;
-    // carryovers
-    const response = await fetch('https://collegecm.work.gd/v1/carryovers')
-    if (!response.ok) throw new Error('Network response was not ok')
-    const jsonResponse = await response.json();
-    if (jsonResponse.carryovers !== null) {
-      data.value = jsonResponse
+  dt = table.value.dt;
+  // carryovers
+  const info = await { year: route.params.year, stage: route.params.stage }
+  const { carryovers, err } = await getCarryovers(info.year, info.stage);
+  if (err !== null) {
+    toast.add({ severity: "error", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 })
+    return;
+  } else {
+    if (carryovers.carryovers !== null) {
+      data.value = carryovers;
     }
-    // students
-    const studentsResponse = await fetch('https://collegecm.work.gd/v1/students');
-    if (!studentsResponse.ok) throw new Error('Failed to fetch students');
-    students.value = await studentsResponse.json();
-    // subjects
-    const subjectsResponse = await fetch('https://collegecm.work.gd/v1/subjects');
-    if (!subjectsResponse.ok) throw new Error('Failed to fetch subjects');
-    const subjectsData = await subjectsResponse.json();
-    subjects.value = subjectsData;
-  } catch (error) {
-    console.error('Error fetching data:', error)
+  }
+  // students
+  const { students: st, err: err1 } = await getStudents(info.year, info.stage);
+  if (err1 !== null) {
+    toast.add({ severity: "error", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 })
+    return;
+  } else {
+    if (st.students !== null) {
+      students.value = st;
+    }
+  }
+  // subjects
+  // TODO subject for previous stage
+  const { subjects: subs, err: err2 } = await getSubjects(info.year, info.stage);
+  if (err2 !== null) {
+    toast.add({ severity: "error", summary: "حدث خطأ", detail: err2 || "حدث خطأ", life: 5000 })
+    return;
+  } else {
+    if (subs.subjects !== null) {
+      subjects.value = subs;
+    }
   }
 });
 // add and update
@@ -96,7 +111,7 @@ const saveCarryover = async () => {
     carryover.value.student_id = carryover.value.student_name.student_id;
     carryover.value.subject_id = carryover.value.subject_name.subject_id;
     const { student_name, subject_name, ...dataToSend } = carryover.value;
-    const { newCarryover, err } = await addCarryover(dataToSend);
+    const { newCarryover, err } = await addCarryover(info.year, dataToSend);
     if (err !== null) {
       toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
     } else if (newCarryover) {
@@ -120,7 +135,7 @@ const confirmDeleteCarryover = (carry) => {
 };
 const deleteCarryover1 = async () => {
   if (carryover?.value.id) {
-    const res = await deleteCarryover(carryover.value.id)
+    const res = await deleteCarryover(info.year, carryover.value.id)
     if (res !== true) {
       toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
     } else {

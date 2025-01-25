@@ -1,9 +1,10 @@
-export async function getStudentData(id) {
-  if (id == null) {
+// students
+export async function getStudentData(year, id) {
+  if (!year || id < 0) {
     return null;
   }
   try {
-    const response = await fetch(`https://collegecm.work.gd/v1/custom/${id}`)
+    const response = await fetch(`https://collegecm.work.gd/v1/custom/${year}/${id}`)
     if (!response.ok) {
       return null;
     }
@@ -14,70 +15,199 @@ export async function getStudentData(id) {
   }
 }
 
-export async function deleteCarryover(id) {
-  if (id == null) {
-    return null;
+export async function getStudents(year, stage) {
+  if (!year || !stage) {
+    return { students: null, err: "حدث خطأ" }
   }
   try {
-    const response = await fetch(`https://collegecm.work.gd/v1/carryovers/${id}`, {
-      method: 'DELETE',
-    });
+    const response = await fetch(`https://collegecm.work.gd/v1/students/${year}/${stage}`)
     if (!response.ok) {
       const errorData = await response.json();
-      return errorData.error
-    }
-    return true;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-}
-
-export async function deleteExempt(id) {
-  if (id == null) {
-    return null;
-  }
-  try {
-    const response = await fetch(`https://collegecm.work.gd/v1/exempteds/${id}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      return errorData.error
-    }
-    return true;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-}
-
-export async function deleteMark(id) {
-  if (id == null) {
-    return null;
-  }
-  try {
-    const response = await fetch(`https://collegecm.work.gd/v1/marks/${id}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      return errorData.error
+      return { students: null, err: errorData.err || 'حدث خطأ' };
     } else {
-      return true;
+      const students = await response.json();
+      return { students: students, err: null };
     }
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    return { students: null, err: "حدث خطأ" }
+  }
+}
+
+export async function deleteStudentC(year, id) {
+  if (!year || id < 0) {
+    return null;
+  }
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/students/${year}/${id}`, {
+      method: 'DELETE',
+    })
+    if (!response.ok) {
+      const errorData = await response.json();
+      return errorData.error || 'حدث خطأ'
+    }
+    return true;
   } catch (error) {
     console.error(error);
     return null;
   }
 }
 
-export async function addCarryover(obj) {
-  if (!obj.student_id || !obj.subject_id) {
+export async function createStudent(year, obj) {
+  if (!year || !obj.student_id) {
+    return { newStudent: null, err: 'حدث خطأ' };
+  }
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/students/${year}`, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(obj)
+    })
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { newStudent: null, err: errorData.error || 'حدث خطأ' };
+    } else {
+      const data = await response.json();
+      return { newStudent: data.student, err: null };
+    }
+  } catch (error) {
+    console.log(error);
+    return { newStudent: null, err: 'حدث خطأ' };
+  }
+}
+
+export async function updateStudent(year, id, obj) {
+  if (!year || id < 0) {
+    return { newStudent: null, err: 'حدث خطأ' };
+  }
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/students/${year}/${id}`, {
+      method: "PATCH",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(obj)
+    })
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { newStudent: null, err: errorData.error || 'حدث خطأ' };
+    } else {
+      const data = await response.json();
+      return { newStudent: data.student, err: null };
+    }
+  } catch (error) {
+    console.log(error);
+    return { newStudent: null, err: 'حدث خطأ' };
+  }
+}
+// subjects
+export async function getSubjects(year, stage) {
+  if (!year || !stage) {
+    return { subjects: null, err: "حدث خطأ" }
+  }
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/subjects/${year}/${stage}`)
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { subjects: null, err: errorData.err || 'حدث خطأ' };
+    } else {
+      const subjects = await response.json();
+      return { subjects: subjects, err: null };
+    }
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    return { subjects: null, err: "حدث خطأ" }
+  }
+}
+
+export async function createSubject(year, obj) {
+  if (!year || !obj.subject_id) {
+    return { newSubject: null, err: 'حدث خطأ' };
+  }
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/subjects/${year}`, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(obj)
+    })
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { newSubject: null, err: errorData.error || 'حدث خطأ' };
+    } else {
+      const data = await response.json();
+      return { newSubject: data.subject, err: null };
+    }
+  } catch (error) {
+    console.log(error);
+    return { newSubject: null, err: 'حدث خطأ' };
+  }
+}
+
+export async function updateSubject(year, id, obj) {
+  if (!year || id < 0) {
+    return { newSubject: null, err: 'حدث خطأ' };
+  }
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/subjects/${year}/${id}`, {
+      method: "PATCH",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(obj)
+    })
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { newSubject: null, err: errorData.error || 'حدث خطأ' };
+    } else {
+      const data = await response.json();
+      return { newSubject: data.subject, err: null };
+    }
+  } catch (error) {
+    console.log(error);
+    return { newSubject: null, err: 'حدث خطأ' };
+  }
+}
+
+export async function deleteSubjectC(year, id) {
+  if (!year || id < 0) {
+    return null;
+  }
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/subjects/${year}/${id}`, {
+      method: 'DELETE',
+    })
+    if (!response.ok) {
+      const errorData = await response.json();
+      return errorData.error || 'حدث خطأ'
+    }
+    return true;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+// carryovers
+export async function getCarryovers(year, stage) {
+  if (!year || !stage) {
+    return { carryovers: null, err: "حدث خطأ" }
+  }
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/carryovers/${year}/${stage}`)
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { carryovers: null, err: errorData.err || 'حدث خطأ' };
+    } else {
+      const carryovers = await response.json();
+      return { carryovers: carryovers, err: null };
+    }
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    return { carryovers: null, err: "حدث خطأ" }
+  }
+}
+
+export async function addCarryover(year, obj) {
+  if (!obj.student_id || !obj.subject_id || !year) {
     return { newCarryover: null, err: 'حدث خطأ' };
   }
   try {
-    const response = await fetch('https://collegecm.work.gd/v1/carryovers', {
+    const response = await fetch(`https://collegecm.work.gd/v1/carryovers/${year}`, {
       method: 'POST',
       body: JSON.stringify(obj),
       headers: {
@@ -97,12 +227,50 @@ export async function addCarryover(obj) {
   }
 }
 
-export async function addExempt(obj) {
-  if (!obj.student_id || !obj.subject_id) {
+export async function deleteCarryover(year, id) {
+  if (!year || id < 0) {
+    return null;
+  }
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/carryovers/${year}/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      return errorData.error
+    }
+    return true;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+// exempted
+export async function getExempteds(year, stage) {
+  if (!year || !stage) {
+    return { exempteds: null, err: "حدث خطأ" }
+  }
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/exempteds/${year}/${stage}`)
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { exempteds: null, err: errorData.err || 'حدث خطأ' };
+    } else {
+      const exempteds = await response.json();
+      return { exempteds: exempteds, err: null };
+    }
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    return { exempteds: null, err: "حدث خطأ" }
+  }
+}
+
+export async function addExempt(year, obj) {
+  if (!obj.student_id || !obj.subject_id || !year) {
     return { newExempt: null, err: 'حدث خطأ' };
   }
   try {
-    const response = await fetch('https://collegecm.work.gd/v1/exempteds', {
+    const response = await fetch(`https://collegecm.work.gd/v1/exempteds/${year}`, {
       method: 'POST',
       body: JSON.stringify(obj),
       headers: {
@@ -122,12 +290,70 @@ export async function addExempt(obj) {
   }
 }
 
-export async function addMark(obj) {
-  if (!obj.student_id || !obj.subject_id) {
+export async function deleteExempt(year, id) {
+  if (!year || id < 0) {
+    return null;
+  }
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/exempteds/${year}/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      return errorData.error
+    }
+    return true;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+// marks
+export async function getMarks(year, stage) {
+  if (!year || !stage) {
+    return { marks: null, err: "حدث خطأ" }
+  }
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/marks/${year}/${stage}`)
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { marks: null, err: errorData.err || 'حدث خطأ' };
+    } else {
+      const marks = await response.json();
+      return { marks: marks, err: null };
+    }
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    return { marks: null, err: "حدث خطأ" }
+  }
+}
+
+export async function deleteMarkC(year, id) {
+  if (!year || id < 0) {
+    return null;
+  }
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/marks/${year}/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      return errorData.error
+    } else {
+      return true;
+    }
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+export async function addMark(year, obj) {
+  if (!obj.student_id || !obj.subject_id || !year) {
     return { newMark: null, err: 'حدث خطأ' };
   }
   try {
-    const response = await fetch('https://collegecm.work.gd/v1/marks', {
+    const response = await fetch(`https://collegecm.work.gd/v1/marks/${year}`, {
       method: 'POST',
       body: JSON.stringify(obj),
       headers: {
@@ -147,12 +373,12 @@ export async function addMark(obj) {
   }
 }
 
-export async function editMark(id, obj) {
-  if (!id) {
+export async function editMark(year, id, obj) {
+  if (id < 0 || !year) {
     return { newMark: null, err: 'حدث خطأ' };
   }
   try {
-    const response = await fetch(`https://collegecm.work.gd/v1/marks/${id}`, {
+    const response = await fetch(`https://collegecm.work.gd/v1/marks/${year}/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(obj),
       headers: {

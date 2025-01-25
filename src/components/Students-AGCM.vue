@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import DataTable from 'datatables.net-vue3';
 import DataTablesCore from 'datatables.net-dt';
 import 'datatables.net-colreorder-dt';
@@ -17,7 +18,7 @@ import InputNumber from 'primevue/inputnumber';
 import Select from 'primevue/select';
 import Dialog from 'primevue/dialog';
 import jszip from 'jszip';
-import { deleteExempt, getStudentData, deleteCarryover, addCarryover, addExempt, deleteMark, addMark, editMark } from '@/controllers/students';
+import { deleteExempt, getStudentData, deleteCarryover, addCarryover, addExempt, addMark, editMark, getStudents, deleteStudentC, createStudent, updateStudent, deleteMarkC } from '@/controllers/students';
 
 DataTable.use(DataTablesCore);
 DataTablesCore.Buttons.jszip(jszip);
@@ -35,7 +36,9 @@ const states = ref([
   { label: 'استضافة في جامعة اخرى', value: 'استضافة في جامعة اخرى' },
 ])
 // global
+const route = useRoute();
 const toast = useToast();
+const info = { year: route.params.year, stage: route.params.stage }
 const cols = [
   { data: 'seq_in_college', title: 'التسلسل في الكلية' },
   { data: 'student_name', title: 'اسم الطالب' },
@@ -123,7 +126,7 @@ const carryoverOpts = {
                 student_id: extraStudent.value.student.student_id,
                 subject_id: carryover.value.subject.subject_id,
               };
-              const { newCarryover, err } = await addCarryover(carryData);
+              const { newCarryover, err } = await addCarryover(info.year, carryData);
               if (err !== null) {
                 toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
                 return;
@@ -179,7 +182,7 @@ const exemptedOpts = {
                 student_id: extraStudent.value.student.student_id,
                 subject_id: exempt.value.subject.subject_id,
               };
-              const { newExempt, err } = await addExempt(exemptData);
+              const { newExempt, err } = await addExempt(info.year, exemptData);
               if (err !== null) {
                 toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
                 return;
@@ -250,7 +253,7 @@ const marksOpts = {
                 semester_mark: mark.value.semester_mark,
                 final_mark: mark.value.final_mark,
               };
-              const { newMark, err } = await addMark(markData);
+              const { newMark, err } = await addMark(info.year, markData);
               if (err !== null) {
                 toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
                 return;
@@ -268,7 +271,7 @@ const marksOpts = {
                 semester_mark: mark.value.semester_mark,
                 final_mark: mark.value.final_mark,
               };
-              const { newMark, err } = await editMark(mark.value.id, markData);
+              const { newMark, err } = await editMark(info.year, mark.value.id, markData);
               if (err !== null) {
                 toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
                 return;
@@ -299,16 +302,14 @@ const table = ref();
 // getting
 const data = ref(null)
 onMounted(async () => {
-  try {
-    dt = table.value.dt;
-    const response = await fetch('https://collegecm.work.gd/v1/students')
-    if (!response.ok) throw new Error('Network response was not ok')
-    const jsonResponse = await response.json();
-    if (jsonResponse.students !== null) {
-      data.value = jsonResponse
-    }
-  } catch (error) {
-    console.error('Error fetching data:', error)
+  dt = table.value.dt;
+  const info = await { year: route.params.year, stage: route.params.stage }
+  const { students, err } = await getStudents(info.year, info.stage);
+  if (err !== null) {
+    toast.add({ severity: "error", summary: "حدث حطأ", detail: err || 'حدث خطأ', life: 5000 });
+    return;
+  } else if (students) {
+    data.value = students
   }
 });
 // add and update
@@ -325,54 +326,30 @@ const saveStudent = async () => {
     student.value.stage = student.value.stage.value;
     student.value.state = student.value.state.value;
     if (!student.value.seq_in_college) {
-      try {
-        const response = await fetch('https://collegecm.work.gd/v1/students', {
-          method: 'POST',
-          body: JSON.stringify(student.value),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          toast.add({ severity: 'danger', summary: 'Fail', details: errorData.error || 'حدث خطأ', life: 10000 });
-        } else {
-          if (!Array.isArray(data.value.students)) {
-            data.value.students = [];
-          }
-          const newStudent = await response.json();
-          data.value.students.push(newStudent.student);
-          toast.add({ severity: 'success', summary: 'Successful', detail: 'تم انشاء المادة', life: 4000 });
-          studentDialog.value = false;
-          student.value = {};
+      const { newStudent, err } = await createStudent(info.year, student.value);
+      if (err !== null) {
+        toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 5000 });
+        return;
+      } else if (newStudent) {
+        if (!Array.isArray(data.value.students)) {
+          data.value.students = [];
         }
-      } catch (err) {
-        toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
-        console.log(err);
+        data.value.students.push(newStudent);
+        toast.add({ severity: 'success', summary: 'Successful', detail: 'تم ادخال الطالب', life: 4000 });
+        studentDialog.value = false;
+        student.value = {};
       }
     } else if (student.value.seq_in_college && student.value.index >= 0) {
-      try {
-        const { index, seq_in_college, ...dataToSend } = student.value
-        const response = await fetch(`https://collegecm.work.gd/v1/students/${student.value.student_id}`, {
-          method: 'PATCH',
-          body: JSON.stringify(dataToSend),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          toast.add({ severity: 'danger', summary: 'Fail', details: errorData.error || 'حدث خطأ', life: 10000 });
-        } else {
-          const newData = await response.json();
-          data.value.students.splice(index, 1, newData.student);
-          toast.add({ severity: 'success', summary: 'Successful', detail: 'تم انشاء المادة', life: 4000 });
-          studentDialog.value = false;
-          student.value = {};
-        }
-      } catch (err) {
-        toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
-        console.log(err);
+      const { index, seq_in_college, ...dataToSend } = student.value
+      const { newStudent, err } = await updateStudent(info.year, student.value.student_id, dataToSend)
+      if (err !== null) {
+        toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 5000 });
+        return;
+      } else if (newStudent) {
+        data.value.students.splice(index, 1, newStudent);
+        toast.add({ severity: 'success', summary: 'Successful', detail: 'تم تحديث الطالب', life: 4000 });
+        studentDialog.value = false;
+        student.value = {};
       }
     }
   } else {
@@ -394,22 +371,14 @@ const confirmDeleteStudent = (stud) => {
 };
 const deleteStudent = async () => {
   if (student?.value.student_id) {
-    try {
-      const response = await fetch(`https://collegecm.work.gd/v1/students/${student.value.student_id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast.add({ severity: 'danger', summary: 'Fail', details: errorData.error || 'حدث خطأ', life: 10000 });
-      } else {
-        data.value.students = data.value.students.filter(val => val.student_id !== student.value.student_id);
-        deleteStudentDialog.value = false;
-        student.value = {};
-        toast.add({ severity: 'success', summary: 'Successful', detail: 'تم حذف الطالب', life: 3000 });
-      }
-    } catch (err) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
-      console.error(err);
+    const res = await deleteStudentC(info.year, student.value.student_id);
+    if (res !== true) {
+      toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 5000 });
+    } else {
+      data.value.students = data.value.students.filter(val => val.student_id !== student.value.student_id);
+      deleteStudentDialog.value = false;
+      student.value = {};
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'تم حذف الطالب', life: 3000 });
     }
   } else {
     toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
@@ -459,7 +428,7 @@ const handleFileUpload = async (event) => {
 const extraStudent = ref({});
 const extraDialog = ref(false);
 const openExtraDialg = async (index, rowData) => {
-  const studentData = await getStudentData(rowData.student_id);
+  const studentData = await getStudentData(info.year, rowData.student_id);
   if (studentData === null) {
     toast.add({ severity: 'danger', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
     return;
@@ -499,7 +468,7 @@ const confirmDeleteMark = (rowData) => {
 }
 const deleteExtraCarry = async () => {
   if (carryToDelete.value) {
-    const res = await deleteCarryover(carryToDelete.value)
+    const res = await deleteCarryover(info.year, carryToDelete.value)
     if (res !== true) {
       toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
     } else {
@@ -514,7 +483,7 @@ const deleteExtraCarry = async () => {
 };
 const deleteExtraExempt = async () => {
   if (exemptToDelete.value) {
-    const res = await deleteExempt(exemptToDelete.value)
+    const res = await deleteExempt(info.year, exemptToDelete.value)
     if (res !== true) {
       toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
     } else {
@@ -529,7 +498,7 @@ const deleteExtraExempt = async () => {
 };
 const deleteExtraMark = async () => {
   if (markToDelete.value) {
-    const res = await deleteMark(markToDelete.value)
+    const res = await deleteMarkC(info.year, markToDelete.value)
     if (res !== true) {
       toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
     } else {

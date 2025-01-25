@@ -16,6 +16,8 @@ import Toast from 'primevue/toast';
 //import ColumnGroup from 'primevue/columngroup';   // optional
 // import Row from 'primevue/row';                   // optional
 import { ref, onMounted, computed } from 'vue'
+import { useRoute } from 'vue-router';
+import { createSubject, deleteSubjectC, getSubjects, updateSubject } from '@/controllers/students';
 
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -49,6 +51,8 @@ const semesters = ref([
   { label: 'الثاني', value: 'الثاني' },
 ]);
 const toast = useToast();
+const route = useRoute();
+const info = { year: route.params.year, stage: route.params.stage };
 // file upload
 const fileInput = ref(null);
 const handleFileUpload = async (event) => {
@@ -96,44 +100,30 @@ const onRowEditSave = async (event) => {
   let { newData, data: rowData } = event;
   const index = data.value.subjects.findIndex(subject => subject.subject_id === rowData.subject_id);
   if (index === -1) {
-    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 10000 });
+    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
     return;
   }
-
-  try {
-    const response = await fetch(`https://collegecm.work.gd/v1/subjects/${rowData.subject_id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(newData),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      toast.add({ severity: 'danger', summary: 'Fail', details: errorData.error || 'حدث خطأ', life: 10000 });
-    } else {
-      // Update the UI if the request was successful
-      data.value.subjects.splice(index, 1, newData);
-    }
-  } catch (error) {
-    // Handle network errors
-    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 10000 });
-    console.error('Error updating subject:', error);
+  const { newSubject, err } = await updateSubject(info.year, rowData.subject_id, newData);
+  if (err !== null) {
+    toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 5000 });
+    return;
+  } else {
+    // Update the UI if the request was successful
+    data.value.subjects.splice(index, 1, newData);
   }
-  data.value.subjects.splice(index, 1, newData);
 }
 
 const data = ref(null)
 const loading = ref(true);
 onMounted(async () => {
-  try {
-    const response = await fetch('https://collegecm.work.gd/v1/subjects')
-    if (!response.ok) throw new Error('Network response was not ok')
-    data.value = await response.json()
+  const info = await { year: route.params.year, stage: route.params.stage }
+  const { subjects, err } = await getSubjects(info.year, info.stage);
+  if (err !== null) {
+    toast.add({ severity: "error", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 });
+    return;
+  } else {
+    data.value = subjects;
     loading.value = false;
-  } catch (error) {
-    console.error('Error fetching data:', error)
   }
 })
 const rowsPerPageOptions = computed(() => {
@@ -158,33 +148,23 @@ const hideDialog = () => {
 };
 const saveSubject = async () => {
   submitted.value = true;
-
   if (subject?.value.subject_id && subject.value.stage && subject.value.semester && subject.value.active && subject.value.ministerial) {
     subject.value.stage = subject.value.stage.value;
     subject.value.semester = subject.value.semester.value;
     subject.value.active = subject.value.active.value;
     subject.value.ministerial = subject.value.ministerial.value;
-    try {
-      const response = await fetch('https://collegecm.work.gd/v1/subjects', {
-        method: 'POST',
-        body: JSON.stringify(subject.value),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast.add({ severity: 'danger', summary: 'Fail', details: errorData.error || 'حدث خطأ', life: 10000 });
-      } else {
-        data.value.subjects.push(subject.value);
-        toast.add({ severity: 'success', summary: 'Successful', detail: 'تم انشاء المادة', life: 4000 });
-        subjectDialog.value = false;
-        subject.value = {};
-      }
-    } catch (err) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
-      console.log(err);
+    const { newSubject, err } = await createSubject(info.year, subject.value);
+    if (err !== null) {
+      toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 5000 });
+      return;
+    } else {
+      data.value.subjects.push(subject.value);
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'تم انشاء المادة', life: 4000 });
+      subjectDialog.value = false;
+      subject.value = {};
     }
+  } else {
+    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
 // delete subject
@@ -195,22 +175,14 @@ const confirmDeleteSubject = (subj) => {
 };
 const deleteSubject = async () => {
   if (subject?.value.subject_id) {
-    try {
-      const response = await fetch(`https://collegecm.work.gd/v1/subjects/${subject.value.subject_id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast.add({ severity: 'danger', summary: 'Fail', details: errorData.error || 'حدث خطأ', life: 10000 });
-      } else {
-        data.value.subjects = data.value.subjects.filter(val => val.subject_id !== subject.value.subject_id);
-        deleteSubjectDialog.value = false;
-        subject.value = {};
-        toast.add({ severity: 'success', summary: 'Successful', detail: 'Subject Deleted', life: 3000 });
-      }
-    } catch (err) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
-      console.error(err);
+    const response = await deleteSubjectC(info.year, subject.value.subject_id);
+    if (response !== true) {
+      toast.add({ severity: 'danger', summary: 'Fail', details: response || 'حدث خطأ', life: 10000 });
+    } else {
+      data.value.subjects = data.value.subjects.filter(val => val.subject_id !== subject.value.subject_id);
+      deleteSubjectDialog.value = false;
+      subject.value = {};
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'تم حذف المادة بنجاح', life: 3000 });
     }
   }
 };
@@ -349,10 +321,10 @@ const exportCSV = () => {
       <div>
         <label for="subject_id" class="block font-bold mb-3">رقم المادة</label>
         <InputNumber id="subject_name" v-model.trim.number="subject.subject_id" required="true" autofocus
-          :invalid="submitted && (subject.subject_id === null || subject.subject_id === undefined || subject.subject.id < 0)"
+          :invalid="submitted && (subject.subject_id === null || subject.subject_id === undefined || subject.subject_id < 0)"
           fluid />
         <small
-          v-if="submitted && (subject.subject_id === null || subject.subject_id === undefined || subject.subject.id < 0)"
+          v-if="submitted && (subject.subject_id === null || subject.subject_id === undefined || subject.subject_id < 0)"
           class="text-red-500">يجب ادخال رقم
           المادة</small>
       </div>
@@ -427,7 +399,7 @@ const exportCSV = () => {
           درجة الامتحان</small>
       </div>
       <div>
-        <label for="credits" class="block font-bold mb-3">الةحدات</label>
+        <label for="credits" class="block font-bold mb-3">الوحدات</label>
         <InputNumber id="credits" v-model.trim.number="subject.credits" required="true" autofocus
           :invalid="submitted && (subject.credits === null || subject.credits === undefined || subject.credits < 0)"
           fluid />

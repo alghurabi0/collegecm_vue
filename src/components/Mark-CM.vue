@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import DataTable from 'datatables.net-vue3';
 import DataTablesCore from 'datatables.net-dt';
 import 'datatables.net-colreorder-dt';
@@ -11,7 +12,7 @@ import Button from 'primevue/button';
 import Select from 'primevue/select';
 import InputNumber from 'primevue/inputnumber';
 import jszip from 'jszip';
-import { addMark, editMark } from '@/controllers/students';
+import { addMark, deleteMarkC, editMark, getMarks, getStudents, getSubjects } from '@/controllers/students';
 
 DataTable.use(DataTablesCore);
 DataTablesCore.Buttons.jszip(jszip);
@@ -21,6 +22,8 @@ const mark = ref({});
 const students = ref(null);
 const subjects = ref(null);
 const toast = useToast();
+const route = useRoute();
+const info = { year: route.params.year, stage: route.params.stage };
 let dt;
 const table = ref();
 const cols = [
@@ -66,26 +69,38 @@ const options = {
 }
 // getting
 onMounted(async () => {
-  try {
-    dt = table.value.dt;
-    // marks
-    const response = await fetch('https://collegecm.work.gd/v1/marks')
-    if (!response.ok) throw new Error('Network response was not ok')
-    const jsonResponse = await response.json();
-    if (jsonResponse.marks !== null) {
-      data.value = jsonResponse
+  dt = table.value.dt;
+  // carryovers
+  const info = await { year: route.params.year, stage: route.params.stage }
+  const { marks, err } = await getMarks(info.year, info.stage);
+  if (err !== null) {
+    toast.add({ severity: "error", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 })
+    return;
+  } else {
+    if (marks.marks !== null) {
+      data.value = marks;
     }
-    // students
-    const studentsResponse = await fetch('https://collegecm.work.gd/v1/students');
-    if (!studentsResponse.ok) throw new Error('Failed to fetch students');
-    students.value = await studentsResponse.json();
-    // subjects
-    const subjectsResponse = await fetch('https://collegecm.work.gd/v1/subjects');
-    if (!subjectsResponse.ok) throw new Error('Failed to fetch subjects');
-    const subjectsData = await subjectsResponse.json();
-    subjects.value = subjectsData;
-  } catch (error) {
-    console.error('Error fetching data:', error)
+  }
+  // students
+  const { students: st, err: err1 } = await getStudents(info.year, info.stage);
+  if (err1 !== null) {
+    toast.add({ severity: "error", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 })
+    return;
+  } else {
+    if (st.students !== null) {
+      students.value = st;
+    }
+  }
+  // subjects
+  // TODO subject for previous stage
+  const { subjects: subs, err: err2 } = await getSubjects(info.year, info.stage);
+  if (err2 !== null) {
+    toast.add({ severity: "error", summary: "حدث خطأ", detail: err2 || "حدث خطأ", life: 5000 })
+    return;
+  } else {
+    if (subs.subjects !== null) {
+      subjects.value = subs;
+    }
   }
 });
 // add and update
@@ -115,9 +130,9 @@ const saveMark = async () => {
     mark.value.student_id = mark.value.student_name.student_id;
     mark.value.subject_id = mark.value.subject_name.subject_id;
     const { student_name, subject_name, ...dataToSend } = mark.value;
-    const { newMark, err } = await addMark(dataToSend);
+    const { newMark, err } = await addMark(info.year, dataToSend);
     if (err !== null) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+      toast.add({ severity: 'warn', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
       return;
     } else if (newMark) {
       if (!Array.isArray(data.value.marks)) {
@@ -132,7 +147,7 @@ const saveMark = async () => {
     const {
       index, id, student_name, subject_name, student_id,
       subject_id, max_semester_mark, max_final_exam, ...dataToSend } = mark.value;
-    const { newMark, err } = await editMark(id, dataToSend);
+    const { newMark, err } = await editMark(info.year, id, dataToSend);
     if (err !== null) {
       toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
     } else if (newMark) {
@@ -158,17 +173,20 @@ const confirmDeleteMark = (carry) => {
 };
 const deleteMark = async () => {
   if (mark?.value.id) {
-    const res = await deleteMark(mark.value.id);
+    const res = await deleteMarkC(info.year, mark.value.id);
     if (res !== true) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
+      toast.add({ severity: 'error', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
+      return;
     } else {
       data.value.marks = data.value.marks.filter(val => val.id !== mark.value.id);
       deleteMarkDialog.value = false;
       mark.value = {};
       toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الحذف', life: 3000 });
+      return;
     }
   } else {
     toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+    return;
   }
 };
 </script>

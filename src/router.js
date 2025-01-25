@@ -2,20 +2,20 @@ import { createWebHistory, createRouter } from 'vue-router'
 
 import HomeView from './components/Home-View.vue'
 import SubjectsCM from './components/Subjects-CM.vue'
-import StudentsCM from './components/Students-CM.vue'
 import StudentsAGCM from './components/Students-AGCM.vue'
 import CarryoversCM from './components/Carryovers-CM.vue'
 import ExemptedsCM from './components/Exempteds-CM.vue'
 import MarkCM from './components/Mark-CM.vue'
+import YearCM from './components/Year-CM.vue'
 
 const routes = [
   { path: '/', component: HomeView },
-  { path: '/subjects', component: SubjectsCM },
-  { path: '/students', component: StudentsCM },
-  { path: '/students-ag', component: StudentsAGCM },
-  { path: '/carryovers', component: CarryoversCM },
-  { path: '/exempted', component: ExemptedsCM },
-  { path: '/marks', component: MarkCM },
+  { path: '/subjects/:year/:stage', component: SubjectsCM },
+  { path: '/students/:year/:stage', component: StudentsAGCM },
+  { path: '/carryovers/:year/:stage', component: CarryoversCM },
+  { path: '/exempted/:year/:stage', component: ExemptedsCM },
+  { path: '/marks/:year/:stage', component: MarkCM },
+  { path: '/year/:year', component: YearCM },
 ]
 
 export const router = createRouter({
