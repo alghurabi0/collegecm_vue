@@ -84,7 +84,7 @@ onMounted(async () => {
   // students
   const { students: st, err: err1 } = await getStudents(info.year, info.stage);
   if (err1 !== null) {
-    toast.add({ severity: "error", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 })
+    toast.add({ severity: "warn", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 })
     return;
   } else {
     if (st.students !== null) {
@@ -95,7 +95,7 @@ onMounted(async () => {
   // TODO subject for previous stage
   const { subjects: subs, err: err2 } = await getSubjects(info.year, info.stage);
   if (err2 !== null) {
-    toast.add({ severity: "error", summary: "حدث خطأ", detail: err2 || "حدث خطأ", life: 5000 })
+    toast.add({ severity: "warn", summary: "حدث خطأ", detail: err2 || "حدث خطأ", life: 5000 })
     return;
   } else {
     if (subs.subjects !== null) {
@@ -149,7 +149,7 @@ const saveMark = async () => {
       subject_id, max_semester_mark, max_final_exam, ...dataToSend } = mark.value;
     const { newMark, err } = await editMark(info.year, id, dataToSend);
     if (err !== null) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+      toast.add({ severity: 'warn', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
     } else if (newMark) {
       data.value.marks.splice(index, 1, newMark);
       toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الانشاء', life: 4000 });
@@ -175,7 +175,7 @@ const deleteMark = async () => {
   if (mark?.value.id) {
     const res = await deleteMarkC(info.year, mark.value.id);
     if (res !== true) {
-      toast.add({ severity: 'error', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
+      toast.add({ severity: 'warn', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
       return;
     } else {
       data.value.marks = data.value.marks.filter(val => val.id !== mark.value.id);
@@ -185,7 +185,7 @@ const deleteMark = async () => {
       return;
     }
   } else {
-    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
     return;
   }
 };

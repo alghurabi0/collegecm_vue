@@ -69,7 +69,7 @@ onMounted(async () => {
   const info = await { year: route.params.year, stage: route.params.stage }
   const { carryovers, err } = await getCarryovers(info.year, info.stage);
   if (err !== null) {
-    toast.add({ severity: "error", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 })
+    toast.add({ severity: "warn", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 })
     return;
   } else {
     if (carryovers.carryovers !== null) {
@@ -79,7 +79,7 @@ onMounted(async () => {
   // students
   const { students: st, err: err1 } = await getStudents(info.year, info.stage);
   if (err1 !== null) {
-    toast.add({ severity: "error", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 })
+    toast.add({ severity: "warn", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 })
     return;
   } else {
     if (st.students !== null) {
@@ -90,7 +90,7 @@ onMounted(async () => {
   // TODO subject for previous stage
   const { subjects: subs, err: err2 } = await getSubjects(info.year, info.stage);
   if (err2 !== null) {
-    toast.add({ severity: "error", summary: "حدث خطأ", detail: err2 || "حدث خطأ", life: 5000 })
+    toast.add({ severity: "warn", summary: "حدث خطأ", detail: err2 || "حدث خطأ", life: 5000 })
     return;
   } else {
     if (subs.subjects !== null) {
@@ -113,7 +113,7 @@ const saveCarryover = async () => {
     const { student_name, subject_name, ...dataToSend } = carryover.value;
     const { newCarryover, err } = await addCarryover(info.year, dataToSend);
     if (err !== null) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+      toast.add({ severity: 'warn', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
     } else if (newCarryover) {
       if (!Array.isArray(data.value.carryovers)) {
         data.value.carryovers = [];
@@ -124,7 +124,7 @@ const saveCarryover = async () => {
       carryover.value = {};
     }
   } else {
-    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 }
 // delete
@@ -137,7 +137,7 @@ const deleteCarryover1 = async () => {
   if (carryover?.value.id) {
     const res = await deleteCarryover(info.year, carryover.value.id)
     if (res !== true) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
+      toast.add({ severity: 'warn', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
     } else {
       data.value.carryovers = data.value.carryovers.filter(val => val.id !== carryover.value.id);
       deleteCarryoverDialog.value = false;
@@ -145,7 +145,7 @@ const deleteCarryover1 = async () => {
       toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الحذف', life: 3000 });
     }
   } else {
-    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
 </script>

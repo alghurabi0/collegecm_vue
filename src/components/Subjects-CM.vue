@@ -75,7 +75,7 @@ const handleFileUpload = async (event) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      toast.add({ severity: 'danger', summary: 'Error', detail: errorData.error || 'Import failed.', life: 5000 });
+      toast.add({ severity: 'warn', summary: 'Error', detail: errorData.error || 'Import failed.', life: 5000 });
     } else {
       // Update the data table after successful import
       const newData = await response.json();
@@ -88,7 +88,7 @@ const handleFileUpload = async (event) => {
       }
     }
   } catch (error) {
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Import failed.', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Import failed.', life: 5000 });
     console.error('Error importing subjects:', error);
   } finally {
     fileInput.value.value = null; // Clear the file input
@@ -100,12 +100,12 @@ const onRowEditSave = async (event) => {
   let { newData, data: rowData } = event;
   const index = data.value.subjects.findIndex(subject => subject.subject_id === rowData.subject_id);
   if (index === -1) {
-    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
     return;
   }
   const { newSubject, err } = await updateSubject(info.year, rowData.subject_id, newData);
   if (err !== null) {
-    toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Fail', details: err || 'حدث خطأ', life: 5000 });
     return;
   } else {
     // Update the UI if the request was successful
@@ -119,7 +119,7 @@ onMounted(async () => {
   const info = await { year: route.params.year, stage: route.params.stage }
   const { subjects, err } = await getSubjects(info.year, info.stage);
   if (err !== null) {
-    toast.add({ severity: "error", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 });
+    toast.add({ severity: "warn", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 });
     return;
   } else {
     data.value = subjects;
@@ -155,7 +155,7 @@ const saveSubject = async () => {
     subject.value.ministerial = subject.value.ministerial.value;
     const { newSubject, err } = await createSubject(info.year, subject.value);
     if (err !== null) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 5000 });
+      toast.add({ severity: 'warn', summary: 'Fail', details: err || 'حدث خطأ', life: 5000 });
       return;
     } else {
       data.value.subjects.push(subject.value);
@@ -164,7 +164,7 @@ const saveSubject = async () => {
       subject.value = {};
     }
   } else {
-    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
 // delete subject
@@ -177,7 +177,7 @@ const deleteSubject = async () => {
   if (subject?.value.subject_id) {
     const response = await deleteSubjectC(info.year, subject.value.subject_id);
     if (response !== true) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: response || 'حدث خطأ', life: 10000 });
+      toast.add({ severity: 'warn', summary: 'Fail', details: response || 'حدث خطأ', life: 10000 });
     } else {
       data.value.subjects = data.value.subjects.filter(val => val.subject_id !== subject.value.subject_id);
       deleteSubjectDialog.value = false;

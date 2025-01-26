@@ -79,7 +79,7 @@ onMounted(async () => {
   // students
   const { students: st, err: err1 } = await getStudents(info.year, info.stage);
   if (err1 !== null) {
-    toast.add({ severity: "error", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 })
+    toast.add({ severity: "warn", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 })
     return;
   } else {
     if (st.students !== null) {
@@ -90,7 +90,7 @@ onMounted(async () => {
   // TODO subject for previous stage
   const { subjects: subs, err: err2 } = await getSubjects(info.year, info.stage);
   if (err2 !== null) {
-    toast.add({ severity: "error", summary: "حدث خطأ", detail: err2 || "حدث خطأ", life: 5000 })
+    toast.add({ severity: "warn", summary: "حدث خطأ", detail: err2 || "حدث خطأ", life: 5000 })
     return;
   } else {
     if (subs.subjects !== null) {
@@ -113,7 +113,7 @@ const saveExempted = async () => {
     const { student_name, subject_name, ...dataToSend } = exempted.value;
     const { newExempt, err } = await addExempt(info.year, dataToSend);
     if (err !== null) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+      toast.add({ severity: 'warn', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
     } else if (newExempt) {
       if (!Array.isArray(data.value.exempteds)) {
         data.value.exempteds = [];
@@ -124,7 +124,7 @@ const saveExempted = async () => {
       exempted.value = {};
     }
   } else {
-    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 }
 // delete
@@ -137,7 +137,7 @@ const deleteExempted = async () => {
   if (exempted?.value.id) {
     const res = await deleteExempt(info.year, exempted.value.id)
     if (res !== true) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
+      toast.add({ severity: 'warn', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
     } else {
       data.value.exempteds = data.value.exempteds.filter(val => val.id !== exempted.value.id);
       deleteExemptedDialog.value = false;
@@ -145,7 +145,7 @@ const deleteExempted = async () => {
       toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الحذف', life: 3000 });
     }
   } else {
-    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
 </script>

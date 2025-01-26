@@ -128,7 +128,7 @@ const carryoverOpts = {
               };
               const { newCarryover, err } = await addCarryover(info.year, carryData);
               if (err !== null) {
-                toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+                toast.add({ severity: 'warn', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
                 return;
               } else if (newCarryover) {
                 if (!Array.isArray(extraStudent.value.carryovers)) {
@@ -140,7 +140,7 @@ const carryoverOpts = {
                 carrySubmitted.value = false;
               }
             } else {
-              toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+              toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
               return;
             }
           }
@@ -184,7 +184,7 @@ const exemptedOpts = {
               };
               const { newExempt, err } = await addExempt(info.year, exemptData);
               if (err !== null) {
-                toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+                toast.add({ severity: 'warn', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
                 return;
               } else if (newExempt) {
                 if (!Array.isArray(extraStudent.value.exempteds)) {
@@ -196,7 +196,7 @@ const exemptedOpts = {
                 exemptSubmitted.value = false;
               }
             } else {
-              toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+              toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
               return;
             }
           }
@@ -255,7 +255,7 @@ const marksOpts = {
               };
               const { newMark, err } = await addMark(info.year, markData);
               if (err !== null) {
-                toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+                toast.add({ severity: 'warn', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
                 return;
               } else if (newMark) {
                 if (!Array.isArray(extraStudent.value.marks)) {
@@ -273,7 +273,7 @@ const marksOpts = {
               };
               const { newMark, err } = await editMark(info.year, mark.value.id, markData);
               if (err !== null) {
-                toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
+                toast.add({ severity: 'warn', summary: 'Fail', details: err || 'حدث خطأ', life: 10000 });
                 return;
               } else if (newMark) {
                 extraStudent.value.marks.splice(mark.value.index, 1, newMark);
@@ -306,7 +306,7 @@ onMounted(async () => {
   const info = await { year: route.params.year, stage: route.params.stage }
   const { students, err } = await getStudents(info.year, info.stage);
   if (err !== null) {
-    toast.add({ severity: "error", summary: "حدث حطأ", detail: err || 'حدث خطأ', life: 5000 });
+    toast.add({ severity: "warn", summary: "حدث حطأ", detail: err || 'حدث خطأ', life: 5000 });
     return;
   } else if (students) {
     data.value = students
@@ -328,7 +328,7 @@ const saveStudent = async () => {
     if (!student.value.seq_in_college) {
       const { newStudent, err } = await createStudent(info.year, student.value);
       if (err !== null) {
-        toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 5000 });
+        toast.add({ severity: 'warn', summary: 'Fail', details: err || 'حدث خطأ', life: 5000 });
         return;
       } else if (newStudent) {
         if (!Array.isArray(data.value.students)) {
@@ -343,7 +343,7 @@ const saveStudent = async () => {
       const { index, seq_in_college, ...dataToSend } = student.value
       const { newStudent, err } = await updateStudent(info.year, student.value.student_id, dataToSend)
       if (err !== null) {
-        toast.add({ severity: 'danger', summary: 'Fail', details: err || 'حدث خطأ', life: 5000 });
+        toast.add({ severity: 'warn', summary: 'Fail', details: err || 'حدث خطأ', life: 5000 });
         return;
       } else if (newStudent) {
         data.value.students.splice(index, 1, newStudent);
@@ -353,7 +353,7 @@ const saveStudent = async () => {
       }
     }
   } else {
-    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
 // update
@@ -373,7 +373,7 @@ const deleteStudent = async () => {
   if (student?.value.student_id) {
     const res = await deleteStudentC(info.year, student.value.student_id);
     if (res !== true) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 5000 });
+      toast.add({ severity: 'warn', summary: 'Fail', details: res || 'حدث خطأ', life: 5000 });
     } else {
       data.value.students = data.value.students.filter(val => val.student_id !== student.value.student_id);
       deleteStudentDialog.value = false;
@@ -381,7 +381,7 @@ const deleteStudent = async () => {
       toast.add({ severity: 'success', summary: 'Successful', detail: 'تم حذف الطالب', life: 3000 });
     }
   } else {
-    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
 // import
@@ -406,7 +406,7 @@ const handleFileUpload = async (event) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      toast.add({ severity: 'danger', summary: 'Error', detail: errorData.error || 'فشل الاستيراد', life: 5000 });
+      toast.add({ severity: 'warn', summary: 'Error', detail: errorData.error || 'فشل الاستيراد', life: 5000 });
     } else {
       const newData = await response.json();
       data.value.students = newData.students;
@@ -418,7 +418,7 @@ const handleFileUpload = async (event) => {
       }
     }
   } catch (error) {
-    toast.add({ severity: 'error', summary: 'Error', detail: 'فشل الاستيراد', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'فشل الاستيراد', life: 5000 });
     console.error('Error importing students:', error);
   } finally {
     fileInput.value.value = null;
@@ -430,7 +430,7 @@ const extraDialog = ref(false);
 const openExtraDialg = async (index, rowData) => {
   const studentData = await getStudentData(info.year, rowData.student_id);
   if (studentData === null) {
-    toast.add({ severity: 'danger', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
     return;
   }
   extraStudent.value = { ...studentData };
@@ -447,7 +447,7 @@ const confirmDeleteCarry = (rowData) => {
     carryToDelete.value = rowData.id;
     deleteCarryDialog.value = true;
   } else {
-    toast.add({ severity: 'danger', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
   }
 };
 const d1 = (rowData) => {
@@ -455,7 +455,7 @@ const d1 = (rowData) => {
     exemptToDelete.value = rowData.id;
     deleteExemptDialog.value = true;
   } else {
-    toast.add({ severity: 'danger', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
   }
 };
 const confirmDeleteMark = (rowData) => {
@@ -463,14 +463,14 @@ const confirmDeleteMark = (rowData) => {
     markToDelete.value = rowData.id;
     deleteMarkDialog.value = true;
   } else {
-    toast.add({ severity: 'danger', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
   }
 }
 const deleteExtraCarry = async () => {
   if (carryToDelete.value) {
     const res = await deleteCarryover(info.year, carryToDelete.value)
     if (res !== true) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
+      toast.add({ severity: 'warn', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
     } else {
       extraStudent.value.carryovers = extraStudent.value.carryovers.filter(val => val.id !== carryToDelete.value);
       deleteCarryDialog.value = false;
@@ -478,14 +478,14 @@ const deleteExtraCarry = async () => {
       toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الحذف', life: 3000 });
     }
   } else {
-    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
 const deleteExtraExempt = async () => {
   if (exemptToDelete.value) {
     const res = await deleteExempt(info.year, exemptToDelete.value)
     if (res !== true) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
+      toast.add({ severity: 'warn', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
     } else {
       extraStudent.value.exempteds = extraStudent.value.exempteds.filter(val => val.id !== exemptToDelete.value);
       deleteExemptDialog.value = false;
@@ -493,14 +493,14 @@ const deleteExtraExempt = async () => {
       toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الحذف', life: 3000 });
     }
   } else {
-    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
 const deleteExtraMark = async () => {
   if (markToDelete.value) {
     const res = await deleteMarkC(info.year, markToDelete.value)
     if (res !== true) {
-      toast.add({ severity: 'danger', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
+      toast.add({ severity: 'warn', summary: 'Fail', details: res || 'حدث خطأ', life: 10000 });
     } else {
       extraStudent.value.marks = extraStudent.value.marks.filter(val => val.id !== markToDelete.value);
       deleteMarkDialog.value = false;
@@ -508,7 +508,7 @@ const deleteExtraMark = async () => {
       toast.add({ severity: 'success', summary: 'Successful', detail: 'تم الحذف', life: 3000 });
     }
   } else {
-    toast.add({ severity: 'danger', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+    toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
 const updateMark = (index, rowData) => {
