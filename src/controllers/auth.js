@@ -36,4 +36,17 @@ export async function login(creds) {
   }
 }
 
-export async function logout() { }
+export async function logout() {
+  try {
+    const response = await fetch('https://collegecm.work.gd/v1/logout', {
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      return errorData.error || 'حدث خطأ';
+    }
+    return null;
+  } catch (error) {
+    console.error('Failed to logout', error);
+  }
+}

@@ -402,6 +402,7 @@ const handleFileUpload = async (event) => {
     const response = await fetch('https://collegecm.work.gd/v1/students/import', {
       method: 'POST',
       body: formData,
+      credentials: 'include'
     });
 
     if (!response.ok) {

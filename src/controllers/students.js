@@ -4,7 +4,9 @@ export async function getStudentData(year, id) {
     return null;
   }
   try {
-    const response = await fetch(`https://collegecm.work.gd/v1/custom/${year}/${id}`)
+    const response = await fetch(`https://collegecm.work.gd/v1/custom/${year}/${id}`,
+      { credentials: 'include' }
+    )
     if (!response.ok) {
       return null;
     }
@@ -20,7 +22,9 @@ export async function getStudents(year, stage) {
     return { students: null, err: "حدث خطأ" }
   }
   try {
-    const response = await fetch(`https://collegecm.work.gd/v1/students/${year}/${stage}`)
+    const response = await fetch(`https://collegecm.work.gd/v1/students/${year}/${stage}`, {
+      credentials: 'include',
+    })
     if (!response.ok) {
       const errorData = await response.json();
       return { students: null, err: errorData.err || 'حدث خطأ' };
@@ -41,6 +45,7 @@ export async function deleteStudentC(year, id) {
   try {
     const response = await fetch(`https://collegecm.work.gd/v1/students/${year}/${id}`, {
       method: 'DELETE',
+      credentials: 'include',
     })
     if (!response.ok) {
       const errorData = await response.json();
@@ -61,7 +66,8 @@ export async function createStudent(year, obj) {
     const response = await fetch(`https://collegecm.work.gd/v1/students/${year}`, {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(obj)
+      body: JSON.stringify(obj),
+      credentials: 'include'
     })
     if (!response.ok) {
       const errorData = await response.json();
@@ -84,7 +90,8 @@ export async function updateStudent(year, id, obj) {
     const response = await fetch(`https://collegecm.work.gd/v1/students/${year}/${id}`, {
       method: "PATCH",
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(obj)
+      body: JSON.stringify(obj),
+      credentials: 'include',
     })
     if (!response.ok) {
       const errorData = await response.json();
@@ -104,7 +111,9 @@ export async function getSubjects(year, stage) {
     return { subjects: null, err: "حدث خطأ" }
   }
   try {
-    const response = await fetch(`https://collegecm.work.gd/v1/subjects/${year}/${stage}`)
+    const response = await fetch(`https://collegecm.work.gd/v1/subjects/${year}/${stage}`, {
+      credentials: 'include',
+    })
     if (!response.ok) {
       const errorData = await response.json();
       return { subjects: null, err: errorData.err || 'حدث خطأ' };
@@ -126,7 +135,8 @@ export async function createSubject(year, obj) {
     const response = await fetch(`https://collegecm.work.gd/v1/subjects/${year}`, {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(obj)
+      body: JSON.stringify(obj),
+      credentials: 'include'
     })
     if (!response.ok) {
       const errorData = await response.json();
@@ -149,7 +159,8 @@ export async function updateSubject(year, id, obj) {
     const response = await fetch(`https://collegecm.work.gd/v1/subjects/${year}/${id}`, {
       method: "PATCH",
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(obj)
+      body: JSON.stringify(obj),
+      credentials: 'include'
     })
     if (!response.ok) {
       const errorData = await response.json();
@@ -171,6 +182,7 @@ export async function deleteSubjectC(year, id) {
   try {
     const response = await fetch(`https://collegecm.work.gd/v1/subjects/${year}/${id}`, {
       method: 'DELETE',
+      credentials: 'include',
     })
     if (!response.ok) {
       const errorData = await response.json();
@@ -188,7 +200,9 @@ export async function getCarryovers(year, stage) {
     return { carryovers: null, err: "حدث خطأ" }
   }
   try {
-    const response = await fetch(`https://collegecm.work.gd/v1/carryovers/${year}/${stage}`)
+    const response = await fetch(`https://collegecm.work.gd/v1/carryovers/${year}/${stage}`, {
+      credentials: 'include'
+    })
     if (!response.ok) {
       const errorData = await response.json();
       return { carryovers: null, err: errorData.err || 'حدث خطأ' };
@@ -212,7 +226,8 @@ export async function addCarryover(year, obj) {
       body: JSON.stringify(obj),
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include'
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -234,6 +249,7 @@ export async function deleteCarryover(year, id) {
   try {
     const response = await fetch(`https://collegecm.work.gd/v1/carryovers/${year}/${id}`, {
       method: 'DELETE',
+      credentials: 'include'
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -251,7 +267,9 @@ export async function getExempteds(year, stage) {
     return { exempteds: null, err: "حدث خطأ" }
   }
   try {
-    const response = await fetch(`https://collegecm.work.gd/v1/exempteds/${year}/${stage}`)
+    const response = await fetch(`https://collegecm.work.gd/v1/exempteds/${year}/${stage}`, {
+      credentials: 'include'
+    })
     if (!response.ok) {
       const errorData = await response.json();
       return { exempteds: null, err: errorData.err || 'حدث خطأ' };
@@ -275,7 +293,8 @@ export async function addExempt(year, obj) {
       body: JSON.stringify(obj),
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include'
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -297,6 +316,7 @@ export async function deleteExempt(year, id) {
   try {
     const response = await fetch(`https://collegecm.work.gd/v1/exempteds/${year}/${id}`, {
       method: 'DELETE',
+      credentials: 'include'
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -314,7 +334,9 @@ export async function getMarks(year, stage) {
     return { marks: null, err: "حدث خطأ" }
   }
   try {
-    const response = await fetch(`https://collegecm.work.gd/v1/marks/${year}/${stage}`)
+    const response = await fetch(`https://collegecm.work.gd/v1/marks/${year}/${stage}`, {
+      credentials: 'include'
+    })
     if (!response.ok) {
       const errorData = await response.json();
       return { marks: null, err: errorData.err || 'حدث خطأ' };
@@ -335,6 +357,7 @@ export async function deleteMarkC(year, id) {
   try {
     const response = await fetch(`https://collegecm.work.gd/v1/marks/${year}/${id}`, {
       method: 'DELETE',
+      credentials: 'include'
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -358,7 +381,8 @@ export async function addMark(year, obj) {
       body: JSON.stringify(obj),
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include'
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -383,7 +407,8 @@ export async function editMark(year, id, obj) {
       body: JSON.stringify(obj),
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include'
     });
     if (!response.ok) {
       const errorData = await response.json();

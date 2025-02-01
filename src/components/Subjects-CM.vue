@@ -71,6 +71,7 @@ const handleFileUpload = async (event) => {
     const response = await fetch('https://collegecm.work.gd/v1/subjects/import', { // Adjust the endpoint URL
       method: 'POST',
       body: formData,
+      credentials: 'include'
     });
 
     if (!response.ok) {

@@ -1,7 +1,9 @@
 // users
 export async function getUsers() {
   try {
-    const response = await fetch("https://collegecm.work.gd/v1/users")
+    const response = await fetch("https://collegecm.work.gd/v1/users", {
+      credentials: 'include'
+    })
     if (!response.ok) {
       const errorData = await response.json();
       return { users: null, err: errorData.err || 'حدث خطأ' };
@@ -21,6 +23,7 @@ export async function deleteUserC(id) {
   try {
     const response = await fetch(`https://collegecm.work.gd/v1/users/${id}`, {
       method: 'DELETE',
+      credentials: 'include'
     })
     if (!response.ok) {
       const errorData = await response.json();
@@ -40,7 +43,8 @@ export async function createUser(obj) {
     const response = await fetch(`https://collegecm.work.gd/v1/users`, {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(obj)
+      body: JSON.stringify(obj),
+      credentials: 'include'
     })
     if (!response.ok) {
       const errorData = await response.json();
@@ -62,7 +66,8 @@ export async function updateUser(id, obj) {
     const response = await fetch(`https://collegecm.work.gd/v1/users/${id}`, {
       method: "PATCH",
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(obj)
+      body: JSON.stringify(obj),
+      credentials: 'include'
     })
     if (!response.ok) {
       const errorData = await response.json();
@@ -82,7 +87,9 @@ export async function getPrivileges(user_id) {
     return { privileges: null, err: "حدث خطأ" }
   }
   try {
-    const response = await fetch(`https://collegecm.work.gd/v1/privileges/${user_id}`)
+    const response = await fetch(`https://collegecm.work.gd/v1/privileges/${user_id}`, {
+      credentials: 'include'
+    })
     if (!response.ok) {
       const errorData = await response.json();
       return { users: null, err: errorData.err || 'حدث خطأ' };

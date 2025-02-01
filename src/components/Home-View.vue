@@ -13,20 +13,17 @@
         </Card>
       </RouterLink>
     </div>
-    <div v-if="user">Hello {{ user.username }}</div>
-    <div v-else>meww</div>
   </div>
 </template>
 
 <script setup>
 import Card from 'primevue/card';
 import { RouterLink } from 'vue-router';
-import { ref, onMounted, inject } from 'vue';
+import { ref, onMounted } from 'vue';
 import { getYears } from '@/controllers/general';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 
-const user = inject('current_user');
 const toast = useToast();
 const data = ref([]);
 onMounted(async () => {

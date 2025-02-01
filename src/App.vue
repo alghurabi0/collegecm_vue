@@ -23,11 +23,13 @@ onMounted(async () => {
 });
 
 const logoutUser = async () => {
+  console.log(current_user.value);
   if (!current_user.value) {
     return;
   }
-  const res = await logout();
-  if (!res) {
+  const err = await logout();
+  if (err !== null) {
+    console.log(err);
     return;
   }
   current_user.value = false;
