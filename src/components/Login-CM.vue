@@ -36,6 +36,7 @@ const info = ref({
 const updateCurrentUser = inject('updateCurrentUser');
 
 const logUser = async () => {
+  console.log(info.value);
   if (!info.value.username || info.value.password) {
     toast.add({ severity: 'warn', detail: "يرجى ملأ يجميع الحقول", life: 5000 });
     return;
