@@ -1,6 +1,8 @@
 export const getYears = async () => {
   try {
-    const response = await fetch('https://collegecm.work.gd/v1/years')
+    const response = await fetch('https://collegecm.work.gd/v1/years', {
+      credentials: 'include',
+    })
     if (!response.ok) {
       const errorData = await response.json()
       return { years: null, err: errorData.error || 'حدث خطأ' };
