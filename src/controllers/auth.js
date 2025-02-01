@@ -19,6 +19,7 @@ export async function login(creds) {
       method: "POST",
       body: JSON.stringify(creds),
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
     });
     if (!response.ok) {
       const errorData = response.json();

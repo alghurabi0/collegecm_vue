@@ -52,7 +52,7 @@ const logoutUser = async () => {
             <Button @click="logoutUser()">تسجيل الخروج</Button>
           </div>
           <div v-else>
-            <Button>تسجيل الدخول</Button>
+            <RouterLink to="/login"><Button>تسجيل الدخول</Button></RouterLink>
           </div>
         </div>
       </nav>
