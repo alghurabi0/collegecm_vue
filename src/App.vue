@@ -34,7 +34,7 @@ const logoutUser = async () => {
     return;
   }
   current_user.value = false;
-  router.push('/');
+  router.push('/login');
 }
 </script>
 
