@@ -39,7 +39,7 @@
   </Dialog>
   <Dialog dir="rtl" v-model:visible="privilegesDialog" class="w-11/12 flex flex-col" :modal="true">
     <div class="flex flex-row justify-around">
-      <h1>{{ userPrivileges.user.username }}</h1>
+      <h1>{{ userPrivileges?.user?.username }}</h1>
     </div>
     <Button class="pi pi-plus" @click="openYearS()">اضافة سنة دراسية</Button>
     <div v-if="addYearS" class="flex flex-col">
