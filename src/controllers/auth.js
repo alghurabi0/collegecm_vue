@@ -39,6 +39,7 @@ export async function login(creds) {
 export async function logout() {
   try {
     const response = await fetch('https://collegecm.work.gd/v1/logout', {
+      method: "POST",
       credentials: 'include',
     });
     if (!response.ok) {
