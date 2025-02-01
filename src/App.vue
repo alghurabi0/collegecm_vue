@@ -1,13 +1,13 @@
 <script setup>
 import { provide, onMounted, ref } from 'vue';
-import { RouterLink, RouterView, useRoter } from 'vue-router'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
 import Button from 'primevue/button';
 import { getAuth, logout } from './controllers/auth';
 
 function toggleDarkMode() {
   document.documentElement.classList.toggle('my-app-dark');
 }
-const router = useRoter();
+const router = useRouter();
 const current_user = ref(false);
 provide('current_user', current_user);
 function updateCurrentUser(user) {
