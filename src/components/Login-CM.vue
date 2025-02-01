@@ -1,6 +1,6 @@
 <template>
   <Toast />
-  <div class="flex flex-col">
+  <div class="flex flex-col w-5/6 md:w-8/12">
     <InputGroup>
       <InputGroupAddon>
         <i class="pi pi-user"></i>
@@ -13,7 +13,7 @@
       </InputGroupAddon>
       <InputText v-model="info.password" placeholder="الرمز السري"></InputText>
     </InputGroup>
-    <Button @click="logUser()"></Button>
+    <Button @click="logUser()">تسجيل الدخول</Button>
   </div>
 </template>
 <script setup>
