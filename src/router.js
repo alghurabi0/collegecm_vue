@@ -7,6 +7,8 @@ import CarryoversCM from './components/Carryovers-CM.vue'
 import ExemptedsCM from './components/Exempteds-CM.vue'
 import MarkCM from './components/Mark-CM.vue'
 import YearCM from './components/Year-CM.vue'
+import UsersCM from './components/Users-CM.vue'
+import LoginCM from './components/Login-CM.vue'
 
 const routes = [
   { path: '/', component: HomeView },
@@ -16,6 +18,9 @@ const routes = [
   { path: '/exempted/:year/:stage', component: ExemptedsCM },
   { path: '/marks/:year/:stage', component: MarkCM },
   { path: '/year/:year', component: YearCM },
+  { path: '/users', component: UsersCM },
+  { path: '/login', component: LoginCM },
+
 ]
 
 export const router = createRouter({
