@@ -1,6 +1,8 @@
 export async function getAuth() {
   try {
-    const response = await fetch('https://collegecm.work.gd/v1/auth/status');
+    const response = await fetch('https://collegecm.work.gd/v1/auth/status', {
+      credentials: 'include',
+    });
     if (!response.ok) {
       return false;
     }
