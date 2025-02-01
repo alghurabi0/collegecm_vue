@@ -41,7 +41,7 @@ const logUser = async () => {
     toast.add({ severity: 'warn', detail: "يرجى ملأ يجميع الحقول", life: 5000 });
     return;
   }
-  const { user, err } = await login(info);
+  const { user, err } = await login(info.value);
   if (err) {
     toast.add({ severity: "warn", summary: "حدث خطأ", detail: err || "حدث خطأ", life: 5000 });
     return
