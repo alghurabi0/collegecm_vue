@@ -133,7 +133,6 @@ const toast = useToast();
 const cols = [
   { data: 'id', title: 'الرقم التعريفي' },
   { data: 'username', title: 'اسم المستخدم' },
-  { data: 'password', title: 'الرمز' },
   { data: 'created_at', title: 'تاريخ الانشاء' },
   {
     data: null,
