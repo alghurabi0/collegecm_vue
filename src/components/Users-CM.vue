@@ -254,7 +254,7 @@ const deleteUser = async () => {
 const userPrivileges = ref({});
 const privilegesDialog = ref(false);
 const groupedPrivileges = computed(() => {
-  return userPrivileges.value.privileges.reduce((acc, priv) => {
+  return userPrivileges?.value.privileges?.reduce((acc, priv) => {
     if (!acc[priv.year]) {
       acc[priv.year] = [];
     }
