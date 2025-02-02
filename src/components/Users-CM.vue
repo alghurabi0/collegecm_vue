@@ -105,7 +105,7 @@ import Accordion from 'primevue/accordion';
 import AccordionPanel from 'primevue/accordionpanel';
 import AccordionHeader from 'primevue/accordionheader';
 import AccordionContent from 'primevue/accordioncontent';
-import { getUsers, deleteUserC, createUser, updateUser, getPrivileges } from '@/controllers/users';
+import { getUsers, deleteUserC, createUser, updateUser, getPrivileges, createPrivilege } from '@/controllers/users';
 import { getYears } from '@/controllers/general';
 
 DataTable.use(DataTablesCore);
@@ -280,11 +280,24 @@ const openYearS = () => {
 }
 const insertYear = async () => {
   privSubmitted.value = true;
-  if (!privilege.value.year) {
+  if (!privilege.value.year || !userPrivileges.value.user?.id) {
     return;
   }
+  privilege.value.user_id = userPrivileges.value.user.id;
   privilege.value.year = privilege.value.year.year;
-  // TODO
+  const { newPrivilege, err } = await createPrivilege(privilege.value);
+  if (err !== null) {
+    toast.add({ severity: 'warn', summary: 'حدث خطأ', detail: err || 'حدث خطأ', life: 5000 });
+    return;
+  } else if (userPrivileges.value) {
+    if (!Array.isArray(userPrivileges.value.privileges)) {
+      userPrivileges.value.privileges = [];
+    }
+    userPrivileges.value.privileges.push(newPrivilege);
+    toast.add({ severity: 'success', summary: 'Successful', detail: 'تم انشاء الصلاحية', life: 3000 });
+    addYearS.value = false;
+    privilege.value = {};
+  }
 }
 // priv
 const privS = ref(false);

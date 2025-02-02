@@ -102,3 +102,25 @@ export async function getPrivileges(user_id) {
     return { privileges: null, err: "حدث خطأ" }
   }
 }
+export async function createPrivilege(obj) {
+  if (!obj.user_id || !obj.year) {
+    return { newPrivilege: null, err: "حدث خطأ" }
+  }
+  try {
+    const response = await fetch("https://collegecm.work.gd/v1/privileges", {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(obj),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { newPrivilege: null, err: errorData.error || 'حدث هطأ' };
+    } else {
+      const data = await response.json();
+      return { newPrivilege: data.privilege, err: null };
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
