@@ -250,31 +250,28 @@ const deleteUser = async () => {
     toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
-// privileges
+// privileges if
 const userPrivileges = ref({});
 const privilegesDialog = ref(false);
 const groupedPrivileges = computed(() => {
-  return userPrivileges?.value.privileges?.reduce((acc, priv) => {
-    if (!acc[priv.year]) {
-      acc[priv.year] = [];
-    }
-    acc[priv.year].push(priv);
-    return acc;
-  }, {});
+  return Array.isArray(userPrivileges.value.privileges) ?
+    userPrivileges.value.privileges.reduce((acc, priv) => {
+      if (!acc[priv.year]) {
+        acc[priv.year] = [];
+      }
+      acc[priv.year].push(priv);
+      return acc;
+    }, {}) : [];
 });
 const openPrivilegesDialog = async (index, rowData) => {
   console.log('opening priv dialog')
   console.log('rowData', rowData);
-  const privilegesData = await getPrivileges(rowData.id);
-  if (privilegesData === null) {
-    toast.add({ severity: 'warn', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
+  const { privileges: privilegesData, err } = await getPrivileges(rowData.id);
+  if (err !== null) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: err || 'حدث خطأ', life: 5000 });
     return;
   }
-  if (privilegesData.privileges === null || privilegesData.privileges === undefined) {
-    userPrivileges.value = { privileges: [], ...privilegesData }
-  } else {
-    userPrivileges.value = { ...privilegesData };
-  }
+  userPrivileges.value = { ...privilegesData }
   console.log('user privileges', userPrivileges.value);
   privilegesDialog.value = true;
 }
