@@ -39,11 +39,11 @@
   </Dialog>
   <Dialog dir="rtl" v-model:visible="privilegesDialog" class="w-11/12 flex flex-col" :modal="true">
     <div class="flex flex-row justify-around">
-      <h1>{{ userPrivileges?.user?.username }}</h1>
+      <h1 class="text-lg"><b>{{ userPrivileges?.user?.username }}</b></h1>
     </div>
     <Button class="pi pi-plus" @click="openPrivS()">اضافة صلاحية</Button>
     <div v-if="privS" class="flex flex-col">
-      <div class="flex flex-row">
+      <div class="flex flex-row gap-x-4">
         <div class="flex flex-col">
           <label for="year">السنة الدراسية</label>
           <Select v-model="privilege.year" :options="data?.years" optionLabel="year" placeholder="اختر السنة الدراسية"
@@ -70,13 +70,21 @@
           <Checkbox v-model="privilege.can_write" binary name="can_write" />
         </div>
       </div>
-      <Button @click="insertPriv()">حفظ</Button>
+      <Button class="mt-2 w-20" @click="insertPriv()">حفظ</Button>
     </div>
     <Accordion value="0">
       <AccordionPanel v-for="(privYear, year) in groupedPrivileges" :key="year">
         <AccordionHeader>{{ year }}</AccordionHeader>
         <AccordionContent>
-          <div v-for="priv in privYear" :key="priv.index">{{ priv }}</div>
+          <div class="gap-x-4 flex flex-row"><span>السنة
+              الدراسية</span><span>الصلاحية</span><span>المرحلة</span><span>المشاهدة</span><span>التعديل</span></div>
+          <div class="flex flex-row gap-x-4" v-for="priv in privYear" :key="priv.index">
+            <span>{{ priv.year }}</span>
+            <span>{{ priv.table_id }}</span>
+            <span>{{ priv.stage }}</span>
+            <span>{{ priv.can_read }}</span>
+            <span>{{ priv.can_write }}</span>
+          </div>
         </AccordionContent>
       </AccordionPanel>
     </Accordion>
