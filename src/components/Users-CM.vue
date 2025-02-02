@@ -41,45 +41,42 @@
     <div class="flex flex-row justify-around">
       <h1>{{ userPrivileges?.user?.username }}</h1>
     </div>
-    <Button class="pi pi-plus" @click="openYearS()">اضافة سنة دراسية</Button>
-    <div v-if="addYearS" class="flex flex-col">
+    <Button class="pi pi-plus" @click="openPrivS()">اضافة صلاحية</Button>
+    <div v-if="privS" class="flex flex-col">
       <div class="flex flex-row">
-        <Select v-model="privilege.year" :options="data?.years" optionLabel="year"
-          placeholder="اختر سنة دراسية"></Select>
-        <Button @click="insertYear()">حفظ</Button>
+        <div class="flex flex-col">
+          <label for="year">السنة الدراسية</label>
+          <Select v-model="privilege.year" :options="data?.years" optionLabel="year" placeholder="اختر السنة الدراسية"
+            name="year"></Select>
+          <small v-if="privSubmitted && !privilege.year" class="text-red-600">مطلوب</small>
+        </div>
+        <div class="flex flex-col">
+          <label for="privilege">الصلاحية</label>
+          <Select v-model="privilege.table_name" :options="tables" optionLabel="label" placeholder="اختر صلاحية"
+            name="privilege"></Select>
+          <small v-if="privSubmitted && !privilege.table_name" class="text-red-600">مطلوب</small>
+        </div>
+        <div class="flex flex-col">
+          <label for="stage">المرحلة</label>
+          <Select v-model="privilege.stage" :options="stages" optionLabel="label" placeholder="اختر المرحلة"
+            name="stage"></Select>
+        </div>
+        <div class="flex flex-col">
+          <label for="can_read">المشاهدة</label>
+          <Checkbox v-model="privilege.can_read" binary name="can_read" />
+        </div>
+        <div class="flex flex-col">
+          <label for="can_write">التعديل</label>
+          <Checkbox v-model="privilege.can_write" binary name="can_write" />
+        </div>
       </div>
-      <small v-if="privSubmitted && !privilege.year" class="text-red-600">يجب اختيار السنة</small>
+      <Button @click="insertPriv()">حفظ</Button>
     </div>
     <Accordion value="0">
       <AccordionPanel v-for="(privYear, year) in groupedPrivileges" :key="year">
         <AccordionHeader>{{ year }}</AccordionHeader>
         <AccordionContent>
           <div v-for="priv in privYear" :key="priv.index">{{ priv }}</div>
-          <Button class="pi pi-plus" @click="openPrivS()">اضافة صلاحية</Button>
-          <div v-if="privS" class="flex flex-col">
-            <div class="flex flex-row">
-              <div class="flex flex-col">
-                <Select v-model="privilege.table_name" :options="tables" optionLabel="label"
-                  placeholder="اختر صلاحية"></Select>
-                <small v-if="privSubmitted && !privilege.table_name" class="text-red-600">مطلوب</small>
-              </div>
-              <div class="flex flex-col">
-                <Select v-model="privilege.stage" :options="stages" optionLabel="label"
-                  placeholder="اختر المرحلة"></Select>
-              </div>
-              <div class="flex flex-col">
-                <Checkbox v-model="privilege.can_read" binary />
-                <small v-if="privSubmitted && (privilege.can_read === null || privilege.can_read === undefined)"
-                  class="text-red-600">مطلوب</small>
-              </div>
-              <div class="flex flex-col">
-                <Checkbox v-model="privilege.can_write" binary />
-                <small v-if="privSubmitted && (privilege.can_write === null || privilege.can_write === undefined)"
-                  class="text-red-600">مطلوب</small>
-              </div>
-            </div>
-            <Button @click="insertPriv(year)">حفظ</Button>
-          </div>
         </AccordionContent>
       </AccordionPanel>
     </Accordion>
@@ -274,53 +271,23 @@ const openPrivilegesDialog = async (index, rowData) => {
 }
 const privilege = ref({});
 const privSubmitted = ref(false);
-// year
-const addYearS = ref(false);
-const openYearS = () => {
-  addYearS.value = true;
-}
-const insertYear = async () => {
-  privSubmitted.value = true;
-  console.log(privilege.value);
-  console.log(userPrivileges.value);
-  if (!privilege.value.year || !userPrivileges.value.user?.id) {
-    console.log('here');
-    return;
-  }
-  privilege.value.user_id = userPrivileges.value.user.id;
-  privilege.value.year = privilege.value.year.year;
-  const { newPrivilege, err } = await createPrivilege(privilege.value);
-  if (err !== null) {
-    toast.add({ severity: 'warn', summary: 'حدث خطأ', detail: err || 'حدث خطأ', life: 5000 });
-    return;
-  } else if (userPrivileges.value) {
-    if (!Array.isArray(userPrivileges.value.privileges)) {
-      userPrivileges.value.privileges = [];
-    }
-    userPrivileges.value.privileges.push(newPrivilege);
-    toast.add({ severity: 'success', summary: 'Successful', detail: 'تم انشاء الصلاحية', life: 3000 });
-    addYearS.value = false;
-    privilege.value = {};
-    privSubmitted.value = false;
-  }
-}
 // priv
 const privS = ref(false);
 const openPrivS = () => {
   privS.value = true;
 }
-const insertPriv = async (year) => {
+const insertPriv = async () => {
   privSubmitted.value = true;
   if (!privilege.value.table_name || privilege.value.can_read === undefined ||
     privilege.value.can_write === undefined || privilege.value.can_read === null ||
-    privilege.value.can_write === null || !privilege.value.stage) {
+    privilege.value.can_write === null || !privilege.value.stage || !privilege.value.year) {
     toast.add({ severity: "warn", detail: "يرجى ملأ المعلومات المطلوبة", life: 5000 });
     return
   }
+  privilege.value.year = privilege.value.year.year;
   privilege.value.table_name = privilege.value.table_name.value;
   privilege.value.stage = privilege.value.stage.value;
   privilege.value.user_id = userPrivileges.value.user?.id;
-  privilege.value.year = year;
   if (!privilege.value.user_id || !privilege.value.year) {
     toast.add({ severity: "warn", detail: "حدث خطأ", life: 5000 });
     return;
