@@ -286,11 +286,15 @@ const openPrivS = () => {
 }
 const insertPriv = async () => {
   privSubmitted.value = true;
-  if (!privilege.value.table_name || privilege.value.can_read === undefined ||
-    privilege.value.can_write === undefined || privilege.value.can_read === null ||
-    privilege.value.can_write === null || !privilege.value.stage || !privilege.value.year) {
+  if (!privilege.value.table_name || !privilege.value.stage || !privilege.value.year) {
     toast.add({ severity: "warn", detail: "يرجى ملأ المعلومات المطلوبة", life: 5000 });
     return
+  }
+  if (privilege.value.can_read !== true) {
+    privilege.value.can_read = false;
+  }
+  if (privilege.value.can_write !== true) {
+    privilege.value.can_write = false;
   }
   privilege.value.year = privilege.value.year.year;
   privilege.value.table_name = privilege.value.table_name.value;

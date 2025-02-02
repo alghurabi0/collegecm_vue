@@ -116,7 +116,7 @@ export async function getSubjects(year, stage) {
     })
     if (!response.ok) {
       const errorData = await response.json();
-      return { subjects: null, err: errorData.err || 'حدث خطأ' };
+      return { subjects: null, err: errorData.error || 'حدث خطأ' };
     } else {
       const subjects = await response.json();
       return { subjects: subjects, err: null };
