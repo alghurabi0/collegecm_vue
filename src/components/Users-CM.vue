@@ -270,8 +270,12 @@ const openPrivilegesDialog = async (index, rowData) => {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
     return;
   }
-  userPrivileges.value = { ...privilegesData };
-  console.log('user privileges', userPrivileges);
+  if (privilegesData.privileges === null || privilegesData.privileges === undefined) {
+    userPrivileges.value = { privileges: [], ...privilegesData }
+  } else {
+    userPrivileges.value = { ...privilegesData };
+  }
+  console.log('user privileges', userPrivileges.value);
   privilegesDialog.value = true;
 }
 const privilege = ref({});
