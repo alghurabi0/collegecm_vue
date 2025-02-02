@@ -267,7 +267,7 @@ export async function getExempteds(year, stage) {
     return { exempteds: null, err: "حدث خطأ" }
   }
   try {
-    const response = await fetch(`https://collegecm.work.gd/v1/exempteds/${year}/${stage}`, {
+    const response = await fetch(`https://collegecm.work.gd/v1/exempted/${year}/${stage}`, {
       credentials: 'include'
     })
     if (!response.ok) {
