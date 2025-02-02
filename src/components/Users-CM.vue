@@ -263,12 +263,15 @@ const groupedPrivileges = computed(() => {
   }, {});
 });
 const openPrivilegesDialog = async (index, rowData) => {
-  const privilegesData = await getPrivileges(rowData.student_id);
+  console.log('opening priv dialog')
+  console.log('rowData', rowData);
+  const privilegesData = await getPrivileges(rowData.id);
   if (privilegesData === null) {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'حدث خطأ', life: 5000 });
     return;
   }
   userPrivileges.value = { ...privilegesData };
+  console.log('user privileges', userPrivileges);
   privilegesDialog.value = true;
 }
 const privilege = ref({});
@@ -280,7 +283,10 @@ const openYearS = () => {
 }
 const insertYear = async () => {
   privSubmitted.value = true;
+  console.log(privilege.value);
+  console.log(userPrivileges.value);
   if (!privilege.value.year || !userPrivileges.value.user?.id) {
+    console.log('here');
     return;
   }
   privilege.value.user_id = userPrivileges.value.user.id;
