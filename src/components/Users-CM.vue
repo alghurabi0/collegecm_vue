@@ -54,7 +54,7 @@
       <AccordionPanel v-for="(privYear, year) in groupedPrivileges" :key="year">
         <AccordionHeader>{{ year }}</AccordionHeader>
         <AccordionContent>
-          <div v-for="priv in privYear" :key="priv.index">priv</div>
+          <div v-for="priv in privYear" :key="priv.index">{{ priv }}</div>
           <Button class="pi pi-plus" @click="openPrivS()">اضافة صلاحية</Button>
           <div v-if="privS" class="flex flex-col">
             <div class="flex flex-row">
@@ -264,15 +264,12 @@ const groupedPrivileges = computed(() => {
     }, {}) : [];
 });
 const openPrivilegesDialog = async (index, rowData) => {
-  console.log('opening priv dialog')
-  console.log('rowData', rowData);
   const { privileges: privilegesData, err } = await getPrivileges(rowData.id);
   if (err !== null) {
     toast.add({ severity: 'warn', summary: 'Error', detail: err || 'حدث خطأ', life: 5000 });
     return;
   }
   userPrivileges.value = { ...privilegesData }
-  console.log('user privileges', userPrivileges.value);
   privilegesDialog.value = true;
 }
 const privilege = ref({});
@@ -304,6 +301,7 @@ const insertYear = async () => {
     toast.add({ severity: 'success', summary: 'Successful', detail: 'تم انشاء الصلاحية', life: 3000 });
     addYearS.value = false;
     privilege.value = {};
+    privSubmitted.value = false;
   }
 }
 // priv
@@ -311,24 +309,36 @@ const privS = ref(false);
 const openPrivS = () => {
   privS.value = true;
 }
-const insertPriv = (year) => {
+const insertPriv = async (year) => {
   privSubmitted.value = true;
   if (!privilege.value.table_name || privilege.value.can_read === undefined ||
     privilege.value.can_write === undefined || privilege.value.can_read === null ||
-    privilege.value.can_write === null) {
+    privilege.value.can_write === null || !privilege.value.stage) {
     toast.add({ severity: "warn", detail: "يرجى ملأ المعلومات المطلوبة", life: 5000 });
     return
   }
   privilege.value.table_name = privilege.value.table_name.value;
-  if (privilege.value.stage) {
-    privilege.value.stage = privilege.value.stage.value;
-  }
-  privilege.value.user_id = user.value.id;
+  privilege.value.stage = privilege.value.stage.value;
+  privilege.value.user_id = userPrivileges.value.user?.id;
   privilege.value.year = year;
   if (!privilege.value.user_id || !privilege.value.year) {
     toast.add({ severity: "warn", detail: "حدث خطأ", life: 5000 });
     return;
   }
   // TODO
+  const { newPrivilege, err } = await createPrivilege(privilege.value);
+  if (err !== null) {
+    toast.add({ severity: 'warn', summary: 'حدث خطأ', detail: err || 'حدث خطأ', life: 5000 });
+    return;
+  } else if (userPrivileges.value) {
+    if (!Array.isArray(userPrivileges.value.privileges)) {
+      userPrivileges.value.privileges = [];
+    }
+    userPrivileges.value.privileges.push(newPrivilege);
+    toast.add({ severity: 'success', summary: 'Successful', detail: 'تم انشاء الصلاحية', life: 3000 });
+    privS.value = false;
+    privilege.value = {};
+    privSubmitted.value = false;
+  }
 }
 </script>
