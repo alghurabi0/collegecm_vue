@@ -27,7 +27,7 @@ export async function getStudents(year, stage) {
     })
     if (!response.ok) {
       const errorData = await response.json();
-      return { students: null, err: errorData.err || 'حدث خطأ' };
+      return { students: null, err: errorData.error || 'حدث خطأ' };
     } else {
       const students = await response.json();
       return { students: students, err: null };
@@ -205,7 +205,7 @@ export async function getCarryovers(year, stage) {
     })
     if (!response.ok) {
       const errorData = await response.json();
-      return { carryovers: null, err: errorData.err || 'حدث خطأ' };
+      return { carryovers: null, err: errorData.error || 'حدث خطأ' };
     } else {
       const carryovers = await response.json();
       return { carryovers: carryovers, err: null };
@@ -272,7 +272,7 @@ export async function getExempteds(year, stage) {
     })
     if (!response.ok) {
       const errorData = await response.json();
-      return { exempteds: null, err: errorData.err || 'حدث خطأ' };
+      return { exempteds: null, err: errorData.error || 'حدث خطأ' };
     } else {
       const exempteds = await response.json();
       return { exempteds: exempteds, err: null };
@@ -339,7 +339,7 @@ export async function getMarks(year, stage) {
     })
     if (!response.ok) {
       const errorData = await response.json();
-      return { marks: null, err: errorData.err || 'حدث خطأ' };
+      return { marks: null, err: errorData.error || 'حدث خطأ' };
     } else {
       const marks = await response.json();
       return { marks: marks, err: null };

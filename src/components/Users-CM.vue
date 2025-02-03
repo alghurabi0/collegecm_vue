@@ -80,7 +80,7 @@
               الدراسية</span><span>الصلاحية</span><span>المرحلة</span><span>المشاهدة</span><span>التعديل</span></div>
           <div class="flex flex-row gap-x-4" v-for="priv in privYear" :key="priv.index">
             <span>{{ priv.year }}</span>
-            <span>{{ priv.table_id }}</span>
+            <span>{{ priv.table_name }}</span>
             <span>{{ priv.stage }}</span>
             <span>{{ priv.can_read }}</span>
             <span>{{ priv.can_write }}</span>
