@@ -117,7 +117,9 @@ const tables = ref([
   { label: "التحميل", value: "carryovers" },
   { label: "الاعفاء", value: "exempted" },
   { label: "الدرجات", value: "marks" },
-  { label: "الغيابات", value: "abstance" },
+  { label: "المستخدمين", value: "users" },
+  { label: "الصلاحيات", value: "privileges" },
+  { label: "السنوات", value: "years" },
   { label: "الكل", value: "all" },
 ]);
 const stages = ref([
