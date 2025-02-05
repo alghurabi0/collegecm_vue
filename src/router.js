@@ -9,6 +9,7 @@ import MarkCM from './components/Mark-CM.vue'
 import YearCM from './components/Year-CM.vue'
 import UsersCM from './components/Users-CM.vue'
 import LoginCM from './components/Login-CM.vue'
+import YearsCM from './components/Years-CM.vue'
 
 const routes = [
   { path: '/', component: HomeView },
@@ -20,7 +21,7 @@ const routes = [
   { path: '/year/:year', component: YearCM },
   { path: '/users', component: UsersCM },
   { path: '/login', component: LoginCM },
-
+  { path: '/years', component: YearsCM },
 ]
 
 export const router = createRouter({

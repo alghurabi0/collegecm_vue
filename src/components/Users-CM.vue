@@ -132,34 +132,36 @@ const stages = ref([
 //
 const toast = useToast();
 const cols = [
-  { data: 'id', title: 'الرقم التعريفي' },
-  { data: 'username', title: 'اسم المستخدم' },
-  { data: 'created_at', title: 'تاريخ الانشاء' },
+  { data: 'id', title: 'الرقم التعريفي', width: '10%' },
+  { data: 'username', title: 'اسم المستخدم', width: '35%' },
+  { data: 'created_at', title: 'تاريخ الانشاء', width: '35%' },
   {
     data: null,
     render: '#action',
     title: '',
     orderable: false,
+    width: '20%'
   },
 ]
 const privCols = [
-  { data: 'year', title: 'السنة الدراسية' },
-  { data: 'table_name', title: 'الصلاحية' },
-  { data: 'stage', title: 'المرحلة' },
-  { data: 'can_read', title: 'المشاهدة' },
-  { data: 'can_write', title: 'التعديل' },
+  { data: 'year', title: 'السنة الدراسية', width: '17%' },
+  { data: 'table_name', title: 'الصلاحية', width: '17%' },
+  { data: 'stage', title: 'المرحلة', width: '17%' },
+  { data: 'can_read', title: 'المشاهدة', width: '16%' },
+  { data: 'can_write', title: 'التعديل', width: '16%' },
   {
     data: null,
     render: `#priv_action`,
     title: '',
     orderable: false,
+    width: '17%'
   },
 ];
 const options = {
   colReorder: true,
   lengthMenu: [10, 50, 100, 500, { label: 'الكل', value: -1 }],
   responive: true,
-  autoWidth: true,
+  autoWidth: false,
   //stateSave: true,
   layout: {
     top2Start: {

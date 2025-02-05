@@ -232,13 +232,17 @@ const items = ref([
 const menu = ref();
 const items2 = ref([
   {
-    label: 'Options',
+    label: 'الاعدادات',
     items: [
       {
         label: 'المستخدمين',
         icon: 'pi pi-user',
         route: '/users'
       },
+      {
+        label: 'السنوات الدراسية',
+        route: '/years'
+      }
     ]
   }
 ]);
