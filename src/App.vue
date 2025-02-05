@@ -1,54 +1,32 @@
 <script setup>
-import { provide, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
 import Button from 'primevue/button';
 import Menubar from 'primevue/menubar';
 import Menu from 'primevue/menu';
-import { getAuth, logout } from './controllers/auth';
+import { useAuthStore } from '@/stores/authStore';
+
 
 function toggleDarkMode() {
   document.documentElement.classList.toggle('my-app-dark');
 }
 const router = useRouter();
 const route = useRoute();
-const year = ref(route.params.year);
-const current_user = ref(false);
-watch(
-  () => route.params.year,
-  (newYear) => {
-    year.value = newYear; // Update the year variable when the route changes
-    console.log(newYear);
-  }
-);
-provide('current_user', current_user);
-function updateCurrentUser(user) {
-  current_user.value = user;
-}
-provide('updateCurrentUser', updateCurrentUser); // Provide the update function
+const year = computed(() => route.params.year);
+const authStore = useAuthStore();
 onMounted(async () => {
-  const user = await getAuth();
-  if (user === false) {
-    return;
-  } else if (user && user.username) {
-    current_user.value = user;
+  await authStore.fetchAuth();
+  if (!authStore.current_user) {
+    router.push('/login');
   }
 });
 
 const logoutUser = async () => {
-  console.log(current_user.value);
-  if (!current_user.value) {
-    return;
-  }
-  const err = await logout();
-  if (err !== null) {
-    console.log(err);
-    return;
-  }
-  current_user.value = false;
+  await authStore.logoutUser();
   router.push('/login');
-}
+};
 
-const items = ref([
+const items = computed(() => [
   {
     label: '',
     icon: 'pi pi-moon',
@@ -259,23 +237,29 @@ const toggle = (event) => {
         <div class="w-full">
           <Menubar v-if="route.path !== '/'" :model="items" dir="rtl" style="width: 100%;">
             <template #item="{ item, props, hasSubmenu }">
+              <!-- Use router-link for all items with routes -->
               <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
                 <a :href="href" v-bind="props.action" @click="navigate">
                   <span :class="item.icon" />
-                  <span>{{ item.label }}</span>
+                  <span class="ml-2">{{ item.label }}</span>
+                  <!-- Show dropdown icon if the item has sub-items -->
+                  <span v-if="hasSubmenu" class="pi pi-fw pi-angle-down ml-2" />
                 </a>
               </router-link>
-              <a v-else :href="item.url" :target="item.target" v-bind="props.action">
+              <!-- Render plain text for items without routes or sub-items -->
+              <a v-else v-bind="props.action">
                 <span :class="item.icon" />
-                <span>{{ item.label }}</span>
-                <span v-if="hasSubmenu" class="pi pi-fw pi-angle-down" />
+                <span class="ml-2">{{ item.label }}</span>
+                <!-- Show dropdown icon if the item has sub-items -->
+                <span v-if="hasSubmenu" class="pi pi-fw pi-angle-down ml-2" />
               </a>
             </template>
             <template #end>
               <div class="flex flex-row place-items-center">
-                <span v-if="current_user?.username" class="mr-5">مرحبا, {{ current_user.username }}</span>
+                <span v-if="authStore.current_user?.username" class="mr-5">مرحبا, {{ authStore.current_user.username
+                  }}</span>
                 <div class="mr-5">
-                  <div v-if="current_user">
+                  <div v-if="authStore.current_user">
                     <Button @click="logoutUser()">تسجيل الخروج</Button>
                   </div>
                   <div v-else>
@@ -306,9 +290,10 @@ const toggle = (event) => {
           <Menubar v-else dir="rtl" style="width: 100%;">
             <template #end>
               <div class="flex flex-row place-items-center">
-                <span v-if="current_user?.username" class="mr-5">مرحبا, {{ current_user.username }}</span>
+                <span v-if="authStore.current_user?.username" class="mr-5">مرحبا, {{ authStore.current_user.username
+                  }}</span>
                 <div class="mr-5">
-                  <div v-if="current_user">
+                  <div v-if="authStore.current_user">
                     <Button @click="logoutUser()">تسجيل الخروج</Button>
                   </div>
                   <div v-else>
@@ -342,6 +327,6 @@ const toggle = (event) => {
   </header>
 
   <body>
-    <RouterView />
+    <RouterView :key="route.fullPath" />
   </body>
 </template>

@@ -1,4 +1,5 @@
 import { createWebHistory, createRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore';
 
 import HomeView from './components/Home-View.vue'
 import SubjectsCM from './components/Subjects-CM.vue'
@@ -28,3 +29,25 @@ export const router = createRouter({
   history: createWebHistory(),
   routes,
 })
+
+// Global navigation guard
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore();
+
+  // Allow access to the login route without authentication
+  if (to.path === '/login') {
+    next();
+    return;
+  }
+
+  // Fetch the user authentication status
+  await authStore.fetchAuth();
+
+  // If the user is authenticated, allow navigation
+  if (authStore.current_user) {
+    next();
+  } else {
+    // Redirect to login if the user is not authenticated
+    next('/login');
+  }
+});
