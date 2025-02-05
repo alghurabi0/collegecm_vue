@@ -6,7 +6,7 @@ export async function getUsers() {
     })
     if (!response.ok) {
       const errorData = await response.json();
-      return { users: null, err: errorData.err || 'حدث خطأ' };
+      return { users: null, err: errorData.error || 'حدث خطأ' };
     } else {
       const users = await response.json();
       return { users: users, err: null };
@@ -92,7 +92,7 @@ export async function getPrivileges(user_id) {
     })
     if (!response.ok) {
       const errorData = await response.json();
-      return { users: null, err: errorData.err || 'حدث خطأ' };
+      return { users: null, err: errorData.error || 'حدث خطأ' };
     } else {
       const privileges = await response.json();
       return { privileges: privileges, err: null };
@@ -122,5 +122,23 @@ export async function createPrivilege(obj) {
     }
   } catch (error) {
     console.error(error);
+  }
+}
+export async function deletePrivC(user_id, table_id, year, stage) {
+  const priv = { user_id, table_id, year, stage };
+  try {
+    const response = await fetch(`https://collegecm.work.gd/v1/privileges`, {
+      method: 'DELETE',
+      body: JSON.stringify(priv),
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      const errorData = await response.json();
+      return errorData.error || 'حدث خطأ'
+    }
+    return true;
+  } catch (error) {
+    console.error(error);
+    return null;
   }
 }

@@ -7,18 +7,16 @@ import 'datatables.net-colreorder-dt';
 import 'datatables.net-responsive-dt';
 import 'datatables.net-buttons';
 import 'datatables.net-buttons/js/buttons.html5';
-//import IconField from 'primevue/iconfield';
-//import InputIcon from 'primevue/inputicon';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
-//import Toolbar from 'primevue/toolbar';
 import InputNumber from 'primevue/inputnumber';
 import Select from 'primevue/select';
 import Dialog from 'primevue/dialog';
 import jszip from 'jszip';
 import { deleteExempt, getStudentData, deleteCarryover, addCarryover, addExempt, addMark, editMark, getStudents, deleteStudentC, createStudent, updateStudent, deleteMarkC } from '@/controllers/students';
+import { determineStage } from '@/controllers/general';
 
 DataTable.use(DataTablesCore);
 DataTablesCore.Buttons.jszip(jszip);
@@ -39,40 +37,45 @@ const states = ref([
 const route = useRoute();
 const toast = useToast();
 const info = { year: route.params.year, stage: route.params.stage }
+const stage = determineStage(info.stage);
+if (stage === null) {
+  toast.add({ severity: 'warn', summary: 'حدث خطأ', detail: 'حدث خطأ', life: 5000 });
+}
 const cols = [
-  { data: 'seq_in_college', title: 'التسلسل في الكلية' },
-  { data: 'student_name', title: 'اسم الطالب' },
-  { data: 'stage', title: 'المرحلة' },
-  { data: 'student_id', title: 'رقم الطالب' },
-  { data: 'state', title: 'الوضع' },
+  { data: 'seq_in_college', title: 'التسلسل في الكلية', width: '5%' },
+  { data: 'student_name', title: 'اسم الطالب', width: '30%' },
+  { data: 'stage', title: 'المرحلة', width: '10%' },
+  { data: 'student_id', title: 'رقم الطالب', width: '5%' },
+  { data: 'state', title: 'الوضع', width: '30%' },
   {
     data: null,
     render: '#action',
     title: '',
     orderable: false,
+    width: '20%'
   },
 ]
 const carryoversCols = [
-  { data: 'subject_name', title: 'المادة' },
-  { data: null, render: '#carry_action', title: '', orderable: false, },
+  { data: 'subject_name', title: 'المادة', width: "70%" },
+  { data: null, render: '#carry_action', title: '', orderable: false, width: "30%" },
 ]
 const exemptedCols = [
-  { data: 'subject_name', title: 'المادة' },
-  { data: null, render: '#exempt_action', title: '', orderable: false, },
+  { data: 'subject_name', title: 'المادة', width: "70%" },
+  { data: null, render: '#exempt_action', title: '', orderable: false, width: "30%" },
 ]
 const marksCols = [
-  { data: 'subject_name', title: 'المادة' },
-  { data: 'semester_mark', title: 'السعي' },
-  { data: 'max_semester_mark', title: 'درجة السعي القصوى' },
-  { data: 'final_mark', title: 'درجة الامتحان النهائي' },
-  { data: 'max_final_exam', title: 'درجة النهائي القصوى' },
-  { data: null, render: '#mark_action', title: '', orderable: false },
+  { data: 'subject_name', title: 'المادة', width: "30%" },
+  { data: 'semester_mark', title: 'السعي', width: "13%" },
+  { data: 'max_semester_mark', title: 'درجة السعي القصوى', width: "13%" },
+  { data: 'final_mark', title: 'درجة الامتحان النهائي', width: "13%" },
+  { data: 'max_final_exam', title: 'درجة النهائي القصوى', width: "13%" },
+  { data: null, render: '#mark_action', title: '', orderable: false, width: "18%" },
 ]
 const options = {
   colReorder: true,
   lengthMenu: [10, 50, 100, 500, { label: 'الكل', value: -1 }],
   responive: true,
-  autoWidth: true,
+  autoWidth: false,
   //stateSave: true,
   layout: {
     top2End: {
@@ -101,7 +104,7 @@ const options = {
 }
 const carryoverOpts = {
   responive: true,
-  autoWidth: true,
+  autoWidth: false,
   searching: false,
   paging: false,
   language: {
@@ -157,7 +160,7 @@ const carryoverOpts = {
 }
 const exemptedOpts = {
   responive: true,
-  autoWidth: true,
+  autoWidth: false,
   searching: false,
   paging: false,
   language: {
@@ -213,7 +216,7 @@ const exemptedOpts = {
 }
 const marksOpts = {
   response: true,
-  autoWidth: true,
+  autoWidth: false,
   searching: false,
   paging: false,
   language: {
@@ -322,8 +325,13 @@ const hideDialog = () => {
 };
 const saveStudent = async () => {
   submitted.value = true;
+  if (stage !== 'all') {
+    student.value.stage = stage;
+  }
   if (student?.value.student_name && student?.value.stage && student?.value.student_id && student?.value.state) {
-    student.value.stage = student.value.stage.value;
+    if (stage === 'all') {
+      student.value.stage = student.value.stage.value;
+    }
     student.value.state = student.value.state.value;
     if (!student.value.seq_in_college) {
       const { newStudent, err } = await createStudent(info.year, student.value);
@@ -557,7 +565,7 @@ const markSubmitted = ref(false);
         <InputText id="student_name" v-model.trim="student.student_name" required="true" />
         <small v-if="submitted && !student.student_name" class="text-red-500">يجب ادخال اسم المادة</small>
       </div>
-      <div>
+      <div v-if="stage === 'all'">
         <label for="stage" class="block font-bold mb-3">المرحلة</label>
         <Select id="stage" v-model="student.stage" :options="stages" optionLabel="label" placeholder="اختر المرحلة"
           fluid></Select>
@@ -587,15 +595,15 @@ const markSubmitted = ref(false);
   </Dialog>
   <Dialog dir="rtl" v-model:visible="extraDialog" class="w-11/12" :modal="true">
     <div class="flex flex-row justify-around">
-      <h1>{{ extraStudent.student.student_name }}</h1>
+      <h1 class="text-lg"><b>{{ extraStudent.student.student_name }}</b></h1>
       <div class="flex flex-col">
-        <h1>{{ extraStudent.student.stage }}</h1>
+        <h1 clas="text-lg"><b>المرحلة {{ extraStudent.student.stage }}</b></h1>
       </div>
     </div>
 
     <div id="carryovers">
-      <h1>التحميل</h1>
-      <DataTable :data="extraStudent?.carryovers" :columns="carryoversCols" dir="rtl" class="cell_bordered"
+      <b>التحميل</b>
+      <DataTable :data="extraStudent?.carryovers" :columns="carryoversCols" dir="rtl" class="cell-border"
         :options="carryoverOpts">
         <template #carry_action="props">
           <Button id="delete_carry" icon="pi pi-trash" outlined rounded severity="danger" class="mr-2 delete-carryover"
@@ -629,8 +637,8 @@ const markSubmitted = ref(false);
     </div>
 
     <div id="exempted">
-      <h1>الاعفاء</h1>
-      <DataTable :data="extraStudent?.exempteds" :columns="exemptedCols" dir="rtl" class="cell_bordered"
+      <b>الاعفاء</b>
+      <DataTable :data="extraStudent?.exempteds" :columns="exemptedCols" dir="rtl" class="cell-border"
         :options="exemptedOpts">
         <template #exempt_action="props">
           <Button id="delete_exempt" icon="pi pi-trash" outlined rounded severity="danger" class="mr-2 delete-exempted"
@@ -664,8 +672,8 @@ const markSubmitted = ref(false);
     </div>
 
     <div id="marks">
-      <h1>الدرجات</h1>
-      <DataTable :data="extraStudent?.marks" :columns="marksCols" dir="rtl" class="cell_bordere" :options="marksOpts">
+      <b>الدرجات</b>
+      <DataTable :data="extraStudent?.marks" :columns="marksCols" dir="rtl" class="cell-border" :options="marksOpts">
         <template #mark_action="props">
           <Button icon="pi pi-pencil" outlined rounded class="mr-2"
             @click="updateMark(props.rowIndex, props.rowData)"></Button>

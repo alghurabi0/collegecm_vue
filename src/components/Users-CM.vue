@@ -72,27 +72,27 @@
       </div>
       <Button class="mt-2 w-20" @click="insertPriv()">حفظ</Button>
     </div>
-    <Accordion value="0">
-      <AccordionPanel v-for="(privYear, year) in groupedPrivileges" :key="year">
-        <AccordionHeader>{{ year }}</AccordionHeader>
-        <AccordionContent>
-          <div class="gap-x-4 flex flex-row"><span>السنة
-              الدراسية</span><span>الصلاحية</span><span>المرحلة</span><span>المشاهدة</span><span>التعديل</span></div>
-          <div class="flex flex-row gap-x-4" v-for="priv in privYear" :key="priv.index">
-            <span>{{ priv.year }}</span>
-            <span>{{ priv.table_name }}</span>
-            <span>{{ priv.stage }}</span>
-            <span>{{ priv.can_read }}</span>
-            <span>{{ priv.can_write }}</span>
-          </div>
-        </AccordionContent>
-      </AccordionPanel>
-    </Accordion>
+    <DataTable dir="rtl" :columns="privCols" :data="userPrivileges?.privileges" :options="privOptions"
+      class="cell-border">
+      <template #priv_action="props">
+        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeletePrivilege(props.rowData)" />
+      </template>
+    </DataTable>
+  </Dialog>
+  <Dialog v-model:visible="deletePrivDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
+    <div class="flex items-center gap-4">
+      <i class="pi pi-exclamation-triangle !text-3xl" />
+      <span v-if="privilege">هل انت متأكد من حذف الصلاحية؟</span>
+    </div>
+    <template #footer>
+      <Button label="لا" icon="pi pi-times" text @click="deletePrivDialog = false" />
+      <Button label="نعم" icon="pi pi-check" @click="deletePriv" />
+    </template>
   </Dialog>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import DataTable from 'datatables.net-vue3';
 import DataTablesCore from 'datatables.net-dt';
 import 'datatables.net-colreorder-dt';
@@ -106,11 +106,7 @@ import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
 import Select from 'primevue/select';
 import Checkbox from 'primevue/checkbox';
-import Accordion from 'primevue/accordion';
-import AccordionPanel from 'primevue/accordionpanel';
-import AccordionHeader from 'primevue/accordionheader';
-import AccordionContent from 'primevue/accordioncontent';
-import { getUsers, deleteUserC, createUser, updateUser, getPrivileges, createPrivilege } from '@/controllers/users';
+import { getUsers, deleteUserC, createUser, updateUser, getPrivileges, createPrivilege, deletePrivC } from '@/controllers/users';
 import { getYears } from '@/controllers/general';
 
 DataTable.use(DataTablesCore);
@@ -146,6 +142,19 @@ const cols = [
     orderable: false,
   },
 ]
+const privCols = [
+  { data: 'year', title: 'السنة الدراسية' },
+  { data: 'table_name', title: 'الصلاحية' },
+  { data: 'stage', title: 'المرحلة' },
+  { data: 'can_read', title: 'المشاهدة' },
+  { data: 'can_write', title: 'التعديل' },
+  {
+    data: null,
+    render: `#priv_action`,
+    title: '',
+    orderable: false,
+  },
+];
 const options = {
   colReorder: true,
   lengthMenu: [10, 50, 100, 500, { label: 'الكل', value: -1 }],
@@ -163,6 +172,20 @@ const options = {
           }
         }
       ],
+    },
+  },
+  language: {
+    url: "https://cdn.datatables.net/plug-ins/2.2.1/i18n/ar.json"
+  }
+}
+const privOptions = {
+  colReorder: true,
+  lengthMenu: [10, 50, 100, 500, { label: 'الكل', value: -1 }],
+  responive: true,
+  autoWidth: false,
+  //stateSave: true,
+  layout: {
+    top2Start: {
     },
   },
   language: {
@@ -189,8 +212,11 @@ onMounted(async () => {
 });
 // add and update
 const user = ref({});
+const privilege = ref({});
 const userDialog = ref(false);
+const privS = ref(false);
 const submitted = ref(false);
+const privSubmitted = ref(false);
 const hideDialog = () => {
   userDialog.value = false;
   submitted.value = false;
@@ -236,9 +262,14 @@ const editUser = (index, rowData) => {
 }
 // delete
 const deleteUserDialog = ref(false);
+const deletePrivDialog = ref(false);
 const confirmDeleteUser = (stud) => {
   user.value = stud;
   deleteUserDialog.value = true;
+};
+const confirmDeletePrivilege = (priv) => {
+  privilege.value = priv;
+  deletePrivDialog.value = true;
 };
 const deleteUser = async () => {
   if (user?.value.id) {
@@ -255,19 +286,24 @@ const deleteUser = async () => {
     toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
   }
 };
+const deletePriv = async () => {
+  if (privilege?.value.user_id && privilege?.value.table_id && privilege?.value.year && privilege?.value.stage) {
+    const res = await deletePrivC(privilege.value.user_id, privilege.value.table_id, privilege.value.year, privilege.value.stage);
+    if (res !== true) {
+      toast.add({ severity: 'warn', summary: 'Fail', details: res || 'حدث خطأ', life: 5000 });
+    } else {
+      userPrivileges.value.privileges = userPrivileges.value.privileges.filter(val => val.year !== privilege.value.year || val.table_id !== privilege.value.table_id || val.stage !== privilege.value.stage);
+      deletePrivDialog.value = false;
+      privilege.value = {};
+      toast.add({ severity: 'success', summary: 'Successful', detail: 'تم حذف الصلاحية', life: 3000 });
+    }
+  } else {
+    toast.add({ severity: 'warn', summary: 'Fail', details: 'حدث خطأ', life: 5000 });
+  }
+};
 // privileges if
 const userPrivileges = ref({});
 const privilegesDialog = ref(false);
-const groupedPrivileges = computed(() => {
-  return Array.isArray(userPrivileges.value.privileges) ?
-    userPrivileges.value.privileges.reduce((acc, priv) => {
-      if (!acc[priv.year]) {
-        acc[priv.year] = [];
-      }
-      acc[priv.year].push(priv);
-      return acc;
-    }, {}) : [];
-});
 const openPrivilegesDialog = async (index, rowData) => {
   const { privileges: privilegesData, err } = await getPrivileges(rowData.id);
   if (err !== null) {
@@ -277,10 +313,7 @@ const openPrivilegesDialog = async (index, rowData) => {
   userPrivileges.value = { ...privilegesData }
   privilegesDialog.value = true;
 }
-const privilege = ref({});
-const privSubmitted = ref(false);
 // priv
-const privS = ref(false);
 const openPrivS = () => {
   privS.value = true;
 }

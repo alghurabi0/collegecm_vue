@@ -18,6 +18,7 @@ import Toast from 'primevue/toast';
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router';
 import { createSubject, deleteSubjectC, getSubjects, updateSubject } from '@/controllers/students';
+import { determineStage } from '@/controllers/general';
 
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -53,6 +54,7 @@ const semesters = ref([
 const toast = useToast();
 const route = useRoute();
 const info = { year: route.params.year, stage: route.params.stage };
+const stage = determineStage(info.stage);
 // file upload
 const fileInput = ref(null);
 const handleFileUpload = async (event) => {
@@ -149,8 +151,13 @@ const hideDialog = () => {
 };
 const saveSubject = async () => {
   submitted.value = true;
+  if (stage !== 'all') {
+    subject.value.stage = stage;
+  }
   if (subject?.value.subject_id && subject.value.stage && subject.value.semester && subject.value.active && subject.value.ministerial) {
-    subject.value.stage = subject.value.stage.value;
+    if (stage === 'all') {
+      subject.value.stage = subject.value.stage.value;
+    }
     subject.value.semester = subject.value.semester.value;
     subject.value.active = subject.value.active.value;
     subject.value.ministerial = subject.value.ministerial.value;
@@ -309,9 +316,9 @@ const exportCSV = () => {
         </Select>
       </template>
     </Column>
-    <Column :rowEditor="true" class="w-5">
+    <Column :rowEditor="true" class="w-5" header="تعديل">
     </Column>
-    <Column :exportable="false" class="w-5">
+    <Column :exportable="false" class="w-5" header="حذف">
       <template #body="slotProps">
         <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteSubject(slotProps.data)" />
       </template>
@@ -340,7 +347,7 @@ const exportCSV = () => {
         <small v-if="submitted && !subject.subject_name_english" class="text-red-500">يجب ادخال اسم المادة
           بالانكليزي</small>
       </div>
-      <div>
+      <div v-if="stage === 'all'">
         <label for="stage" class="block font-bold mb-3">المرحلة</label>
         <Select id="stage" v-model="subject.stage" :options="stages" optionLabel="label" optionsValue="value"
           placeholder="اختر المرحلة" fluid></Select>

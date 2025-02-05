@@ -15,3 +15,24 @@ export const getYears = async () => {
     return { years: null, err: 'حدث خطأ' };
   }
 }
+
+export const determineStage = (stage) => {
+  switch (stage) {
+    case '1':
+      return 'الاولى';
+    case '2':
+      return 'الثانية';
+    case '3':
+      return 'الثالثة';
+    case '4':
+      return 'الرابعة';
+    case '5':
+      return 'الخامسة';
+    case '6':
+      return 'السادسة';
+    case 'all':
+      return 'all';
+    default:
+      return null;
+  }
+}

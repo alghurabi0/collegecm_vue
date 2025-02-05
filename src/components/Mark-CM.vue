@@ -27,25 +27,26 @@ const info = { year: route.params.year, stage: route.params.stage };
 let dt;
 const table = ref();
 const cols = [
-  { data: 'id', title: 'التسلسل' },
-  { data: 'student_name', title: 'اسم الطالب' },
-  { data: 'subject_name', title: 'المادة' },
-  { data: 'semester_mark', title: 'درجة السعي' },
-  { data: 'max_semester_mark', title: 'درجة السعي القصوى' },
-  { data: 'max_final_exam', title: 'درجة النهائي القصوى' },
-  { data: 'final_mark', title: 'درجة الامتحان النهائي' },
+  { data: 'id', title: 'التسلسل', width: "10%" },
+  { data: 'student_name', title: 'اسم الطالب', width: "25%" },
+  { data: 'subject_name', title: 'المادة', width: "25%" },
+  { data: 'semester_mark', title: 'درجة السعي', width: "6%" },
+  { data: 'max_semester_mark', title: 'درجة السعي القصوى', width: "7%" },
+  { data: 'max_final_exam', title: 'درجة النهائي القصوى', width: "6%" },
+  { data: 'final_mark', title: 'درجة الامتحان النهائي', width: "6%" },
   {
     data: null,
     render: '#action',
     title: '',
     orderable: false,
+    width: "15%"
   },
 ]
 const options = {
   colReorder: true,
   lengthMenu: [10, 50, 100, 500, { label: 'الكل', value: -1 }],
   responive: true,
-  autoWidth: true,
+  autoWidth: false,
   //stateSave: true,
   layout: {
     top2End: {

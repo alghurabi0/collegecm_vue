@@ -26,21 +26,22 @@ const info = { year: route.params.year, stage: route.params.stage };
 let dt;
 const table = ref();
 const cols = [
-  { data: 'id', title: 'التسلسل' },
-  { data: 'student_name', title: 'اسم الطالب' },
-  { data: 'subject_name', title: 'المادة' },
+  { data: 'id', title: 'التسلسل', width: "15%" },
+  { data: 'student_name', title: 'اسم الطالب', width: "35%" },
+  { data: 'subject_name', title: 'المادة', width: "35%" },
   {
     data: null,
     render: '#action',
     title: '',
     orderable: false,
+    width: "15%"
   },
 ]
 const options = {
   colReorder: true,
   lengthMenu: [10, 50, 100, 500, { label: 'الكل', value: -1 }],
   responive: true,
-  autoWidth: true,
+  autoWidth: false,
   //stateSave: true,
   layout: {
     top2End: {
