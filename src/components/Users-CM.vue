@@ -120,7 +120,6 @@ const tables = ref([
   { label: "المستخدمين", value: "users" },
   { label: "الصلاحيات", value: "privileges" },
   { label: "السنوات", value: "years" },
-  { label: "الكل", value: "all" },
 ]);
 const stages = ref([
   { label: 'الاولى', value: 'الاولى' },

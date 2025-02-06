@@ -79,12 +79,14 @@ const options = {
   //stateSave: true,
   layout: {
     top2End: {
-      buttons: ['csv', { extend: 'excel', text: 'Excel تصدير', className: 'excel_button' }, {
-        text: "CSV استيراد", name: "import_csv",
-        action: function () {
-          fileInput.value.click();
-        }
-      }]
+      buttons: ['csv', { extend: 'excel', text: 'Excel تصدير', className: 'excel_button' },
+        info.stage === "all" ? {
+          text: "Excel استيراد", name: "import_csv",
+          action: function () {
+            fileInput.value.click();
+          }
+        } : {}
+      ]
     },
     top2Start: {
       buttons: [
@@ -297,15 +299,13 @@ const marksOpts = {
     }
   },
 }
-let dt;
-const table = ref();
 // pagination
 
 // filtering
 // getting
-const data = ref(null)
+const data = ref({ students: [] })
+const loading = ref(true);
 onMounted(async () => {
-  dt = table.value.dt;
   const info = await { year: route.params.year, stage: route.params.stage }
   const { students, err } = await getStudents(info.year, info.stage);
   if (err !== null) {
@@ -314,6 +314,7 @@ onMounted(async () => {
   } else if (students) {
     data.value = students
   }
+  loading.value = false;
 });
 // add and update
 const student = ref({});
@@ -398,7 +399,7 @@ const handleFileUpload = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
 
-  if (!file.type.match('text/csv')) {
+  if (!file.name.endsWith('.xlsx')) {
     toast.add({ severity: 'warn', summary: 'Warning', detail: 'يرجى اختيار ملف بصيغة csv', life: 3000 });
     return;
   }
@@ -407,7 +408,7 @@ const handleFileUpload = async (event) => {
   formData.append('file', file);
 
   try {
-    const response = await fetch('https://collegecm.work.gd/v1/students/import', {
+    const response = await fetch(`https://collegecm.work.gd/v1/students/import/${info.year}`, {
       method: 'POST',
       body: formData,
       credentials: 'include'
@@ -538,8 +539,9 @@ const markSubmitted = ref(false);
 </script>
 <template>
   <Toast />
-  <input type="file" ref="fileInput" hidden @change="handleFileUpload" accept=".csv" />
-  <DataTable dir="rtl" :columns="cols" :data="data?.students" ref="table" :options="options" class="cell-border">
+  <input type="file" ref="fileInput" hidden @change="handleFileUpload" accept=".xlsx" />
+  <div v-if="loading">Loading</div>
+  <DataTable v-else dir="rtl" :columns="cols" :data="data?.students" :options="options" class="cell-border">
     <template #action="props">
       <Button icon="pi pi-info" outlined rounded @click="openExtraDialg(props.rowIndex, props.rowData)"></Button>
       <Button icon="pi pi-pencil" outlined rounded class="mr-2"

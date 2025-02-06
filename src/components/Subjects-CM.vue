@@ -56,47 +56,47 @@ const route = useRoute();
 const info = { year: route.params.year, stage: route.params.stage };
 const stage = determineStage(info.stage);
 // file upload
-const fileInput = ref(null);
-const handleFileUpload = async (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
+// const fileInput = ref(null);
+// const handleFileUpload = async (event) => {
+//   const file = event.target.files[0];
+//   if (!file) return;
 
-  if (!file.type.match('text/csv')) {
-    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please upload a CSV file.', life: 3000 });
-    return;
-  }
+//   if (!file.type.match('text/csv')) {
+//     toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please upload a CSV file.', life: 3000 });
+//     return;
+//   }
 
-  const formData = new FormData();
-  formData.append('file', file);
+//   const formData = new FormData();
+//   formData.append('file', file);
 
-  try {
-    const response = await fetch('https://collegecm.work.gd/v1/subjects/import', { // Adjust the endpoint URL
-      method: 'POST',
-      body: formData,
-      credentials: 'include'
-    });
+//   try {
+//     const response = await fetch('https://collegecm.work.gd/v1/subjects/import', { // Adjust the endpoint URL
+//       method: 'POST',
+//       body: formData,
+//       credentials: 'include'
+//     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      toast.add({ severity: 'warn', summary: 'Error', detail: errorData.error || 'Import failed.', life: 5000 });
-    } else {
-      // Update the data table after successful import
-      const newData = await response.json();
-      data.value.subjects = newData.subjects; // Assuming the response contains the updated subjects array
-      toast.add({ severity: 'success', summary: 'Success', detail: 'Subjects imported successfully.', life: 2000 });
-      if (newData.errors) {
-        Object.keys(newData.errors).forEach(key => {
-          toast.add({ severity: 'warn', summary: 'لم يتم ادخال المواد التالية', detail: `${key}: ${newData.errors[key]}` })
-        })
-      }
-    }
-  } catch (error) {
-    toast.add({ severity: 'warn', summary: 'Error', detail: 'Import failed.', life: 5000 });
-    console.error('Error importing subjects:', error);
-  } finally {
-    fileInput.value.value = null; // Clear the file input
-  }
-};
+//     if (!response.ok) {
+//       const errorData = await response.json();
+//       toast.add({ severity: 'warn', summary: 'Error', detail: errorData.error || 'Import failed.', life: 5000 });
+//     } else {
+//       // Update the data table after successful import
+//       const newData = await response.json();
+//       data.value.subjects = newData.subjects; // Assuming the response contains the updated subjects array
+//       toast.add({ severity: 'success', summary: 'Success', detail: 'Subjects imported successfully.', life: 2000 });
+//       if (newData.errors) {
+//         Object.keys(newData.errors).forEach(key => {
+//           toast.add({ severity: 'warn', summary: 'لم يتم ادخال المواد التالية', detail: `${key}: ${newData.errors[key]}` })
+//         })
+//       }
+//     }
+//   } catch (error) {
+//     toast.add({ severity: 'warn', summary: 'Error', detail: 'Import failed.', life: 5000 });
+//     console.error('Error importing subjects:', error);
+//   } finally {
+//     fileInput.value.value = null; // Clear the file input
+//   }
+// };
 // editing rows
 const editingRows = ref([]);
 const onRowEditSave = async (event) => {
@@ -209,8 +209,8 @@ const exportCSV = () => {
       <Button label="اضافة" icon="pi pi-plus" class="mr-2" @click="openNew" />
     </template>
     <template #end>
-      <input type="file" ref="fileInput" hidden @change="handleFileUpload" accept=".csv" />
-      <Button label="استيراد" icon="pi pi-download" severity="secondary" @click="fileInput.click()" class="mr-2" />
+      <!-- <input type="file" ref="fileInput" hidden @change="handleFileUpload" accept=".csv" />
+      <Button label="استيراد" icon="pi pi-download" severity="secondary" @click="fileInput.click()" class="mr-2" /> -->
       <Button label="تصدير" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
     </template>
   </Toolbar>
