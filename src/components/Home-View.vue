@@ -50,6 +50,7 @@ onMounted(async () => {
 const yearS = ref(false);
 const year = ref({});
 const yearsOpts = ref([
+  { label: '2023_2024', value: '2023_2024' },
   { label: '2025_2026', value: '2025_2026' },
   { label: '2026_2027', value: '2026_2027' }
 ])
