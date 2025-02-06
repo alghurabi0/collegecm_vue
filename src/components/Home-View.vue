@@ -12,7 +12,7 @@
         <Button class="mr-2" @click="yearS = false">الغاء</Button>
       </div>
     </div>
-    <div v-if="data?.years" class="mt-3">
+    <div v-if="data?.years" class="mt-3 w-64">
       <RouterLink v-for="year in data?.years" :key="year.year" :to="`/year/${encodeURIComponent(year.year)}`">
         <Card class="w-56 text-center border-2 border-green-500">
           <template #title>
